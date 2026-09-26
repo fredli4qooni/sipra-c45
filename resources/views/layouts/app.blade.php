@@ -108,17 +108,16 @@
                     
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3 min-w-0">
-                            <!-- Initials Avatar -->
-                            @php
-                                $name = auth()->user()->name ?? 'User';
-                                $words = explode(' ', $name);
-                                $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
-                            @endphp
-                            <div class="w-10 h-10 rounded-lg bg-brand-600 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
-                                {{ $initials }}
-                            </div>
+                            <!-- Avatar (Photo or Initials) -->
+                            @if(auth()->user()->avatar_url)
+                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-xs flex-shrink-0">
+                            @else
+                                <div class="w-10 h-10 rounded-lg bg-brand-600 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                                    {{ auth()->user()->initials }}
+                                </div>
+                            @endif
                             <div class="min-w-0 flex-1">
-                                <p class="text-xs font-bold text-slate-900 truncate">{{ $name }}</p>
+                                <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
                                 <p class="text-[11px] text-slate-500 truncate font-mono">
                                     {{ auth()->user()->nim_nip ?? auth()->user()->email }}
                                 </p>
@@ -330,10 +329,16 @@
 
 
 
-                    <!-- User Initials Pill & Logout -->
+                    <!-- User Avatar Pill & Logout -->
                     <div class="flex items-center pl-2 space-x-1.5 border-l border-slate-200">
-                        <a href="{{ route('profile.edit') }}" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 font-bold text-xs flex items-center justify-center transition" title="Edit Profil">
-                            {{ $initials }}
+                        <a href="{{ route('profile.edit') }}" class="w-8 h-8 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center transition hover:border-brand-300 shadow-2xs" title="Edit Profil">
+                            @if(auth()->user()->avatar_url)
+                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
+                            @else
+                                <span class="w-full h-full bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-700 font-bold text-xs flex items-center justify-center">
+                                    {{ auth()->user()->initials }}
+                                </span>
+                            @endif
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf

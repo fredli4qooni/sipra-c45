@@ -74,4 +74,60 @@ class AuthTest extends TestCase
         $response->assertSee('Pusat Bantuan & Panduan Sistem');
         $response->assertSee('Landasan Matematis Algoritma C4.5');
     }
+
+    public function test_authenticated_user_can_view_profile_page(): void
+    {
+        $user = User::first();
+        $response = $this->actingAs($user)->get(route('profile.edit'));
+        $response->assertStatus(200);
+        $response->assertSee('Pengaturan Profil Akun');
+        $response->assertSee($user->email);
+    }
+
+    public function test_user_can_upload_avatar(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $user = User::first();
+        $file = \Illuminate\Http\UploadedFile::fake()->image('profile.jpg', 200, 200);
+
+        $response = $this->actingAs($user)->put(route('profile.update'), [
+            'name' => 'Updated Name',
+            'email' => $user->email,
+            'phone' => '08123456789',
+            'avatar' => $file,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $user->refresh();
+        $this->assertEquals('Updated Name', $user->name);
+        $this->assertNotNull($user->avatar);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($user->avatar);
+        $this->assertNotNull($user->avatar_url);
+    }
+
+    public function test_user_can_remove_avatar(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $user = User::first();
+        $file = \Illuminate\Http\UploadedFile::fake()->image('profile.png', 100, 100);
+        $path = $file->store('avatars', 'public');
+        $user->update(['avatar' => $path]);
+
+        $response = $this->actingAs($user)->put(route('profile.update'), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'remove_avatar' => 1,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $user->refresh();
+        $this->assertNull($user->avatar);
+        $this->assertNull($user->avatar_url);
+    }
 }

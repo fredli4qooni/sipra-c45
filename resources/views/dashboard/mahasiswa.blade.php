@@ -18,9 +18,13 @@
         <!-- Student Info Header Card -->
         <div class="p-6 sm:p-8 rounded-xl bg-white border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
             <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-5 text-center sm:text-left">
-                <div class="w-16 h-16 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 font-extrabold text-2xl flex items-center justify-center shadow-xs flex-shrink-0">
-                    {{ strtoupper(substr($mahasiswa->nama, 0, 2)) }}
-                </div>
+                @if(auth()->user()->avatar_url)
+                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ $mahasiswa->nama }}" class="w-16 h-16 rounded-xl object-cover border border-slate-200 shadow-xs flex-shrink-0">
+                @else
+                    <div class="w-16 h-16 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 font-extrabold text-2xl flex items-center justify-center shadow-xs flex-shrink-0 font-display">
+                        {{ strtoupper(substr($mahasiswa->nama, 0, 2)) }}
+                    </div>
+                @endif
                 <div>
                     <h3 class="text-xl font-extrabold text-slate-900 font-display">{{ $mahasiswa->nama }}</h3>
                     <p class="text-sm font-mono text-brand-700 font-bold mt-0.5">{{ $mahasiswa->nim }}</p>

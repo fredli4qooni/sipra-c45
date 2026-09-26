@@ -77,6 +77,33 @@ class User extends Authenticatable
         return in_array($this->role, $roles);
     }
 
+    public function getRoleLabelAttribute(): string
+    {
+        return match($this->role) {
+            'admin' => 'Administrator',
+            'prodi' => 'Ketua Program Studi',
+            'dosen_pa' => 'Dosen PA',
+            'mahasiswa' => 'Mahasiswa',
+            default => ucfirst($this->role ?? 'User'),
+        };
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if ($this->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->avatar)) {
+            return asset('storage/' . $this->avatar);
+        }
+        return null;
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $words = preg_split('/\s+/', trim($this->name ?? 'User'));
+        $first = mb_substr($words[0] ?? 'U', 0, 1);
+        $second = isset($words[1]) ? mb_substr($words[1], 0, 1) : '';
+        return strtoupper($first . $second) ?: 'U';
+    }
+
     // Relationships
     public function mahasiswa(): HasOne
     {
