@@ -296,4 +296,83 @@ class SpreadsheetService
             'Cache-Control' => 'max-age=0',
         ]);
     }
+
+    /**
+     * Generate and stream download of pre-formatted Excel Batch Prediction Template
+     */
+    public static function downloadBatchPredictionTemplate(): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Template Prediksi Massal');
+
+        // Headers
+        $headers = [
+            'A1' => 'NIM',
+            'B1' => 'Nama Mahasiswa',
+            'C1' => 'Semester',
+            'D1' => 'IPS',
+            'E1' => 'IPK',
+            'F1' => 'SKS Semester',
+            'G1' => 'SKS Tidak Lulus',
+            'H1' => 'Kehadiran (%)',
+            'I1' => 'Status Cuti (Ya/Tidak)',
+        ];
+
+        foreach ($headers as $cell => $value) {
+            $sheet->setCellValue($cell, $value);
+        }
+
+        // Header Styling
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+                'size' => 11,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '0F766E'], // Teal-700
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '134E4A'],
+                ],
+            ],
+        ];
+
+        $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+        // Realistic Sample Data Rows
+        $sampleData = [
+            ['2271020001', 'Ahmad Fauzi', 4, 3.80, 3.75, 22, 0, 95.0, 'Tidak'],
+            ['2271020002', 'Budi Santoso', 6, 2.85, 2.90, 20, 2, 82.0, 'Tidak'],
+            ['2271020003', 'Citra Dewi', 8, 1.85, 2.10, 14, 9, 65.0, 'Ya'],
+            ['2271020004', 'Dimas Prayoga', 4, 3.20, 3.15, 20, 0, 88.0, 'Tidak'],
+            ['2271020005', 'Eka Rahmawati', 6, 2.40, 2.60, 16, 6, 72.0, 'Tidak'],
+        ];
+
+        $sheet->fromArray($sampleData, null, 'A2');
+
+        // Auto size columns
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="Template_Prediksi_Massal_C45.xlsx"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
 }

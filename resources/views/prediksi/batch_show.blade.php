@@ -88,6 +88,44 @@
 
     </div>
 
+    <!-- Skipped Rows Validation Feedback Alert -->
+    @if(($batch->skipped_records ?? 0) > 0 && !empty($batch->error_logs))
+        <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2.5 text-amber-900 font-bold text-xs">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600"></i>
+                    <span>Catatan Validasi: {{ $batch->skipped_records }} Baris Data Dilewati</span>
+                </div>
+                <span class="text-[11px] text-amber-700 font-medium">Format di luar spesifikasi toleransi</span>
+            </div>
+            <p class="text-[11px] text-amber-800 leading-relaxed">
+                Baris-baris data berikut dilewati karena mengandung nilai di luar batas toleransi atau kolom utama yang kosong:
+            </p>
+            <div class="overflow-x-auto rounded-lg border border-amber-200 bg-white">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="bg-amber-100/50 text-amber-900 font-semibold border-b border-amber-200">
+                            <th class="py-2 px-3">Baris Excel</th>
+                            <th class="py-2 px-3">NIM</th>
+                            <th class="py-2 px-3">Nama Mahasiswa</th>
+                            <th class="py-2 px-3">Keterangan Kesalahan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-amber-100">
+                        @foreach($batch->error_logs as $err)
+                            <tr class="hover:bg-amber-50/40">
+                                <td class="py-2 px-3 font-mono font-bold text-amber-800">Baris {{ $err['row'] ?? '-' }}</td>
+                                <td class="py-2 px-3 font-mono text-slate-700">{{ $err['nim'] ?? '-' }}</td>
+                                <td class="py-2 px-3 text-slate-700">{{ $err['nama'] ?? '-' }}</td>
+                                <td class="py-2 px-3 text-rose-600 font-medium">{{ $err['reason'] ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
     <!-- Student List Table -->
     <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">

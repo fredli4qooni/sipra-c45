@@ -54,6 +54,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('prediksi/single', [\App\Http\Controllers\PrediksiController::class, 'createSingle'])->name('prediksi.single');
         Route::post('prediksi/single', [\App\Http\Controllers\PrediksiController::class, 'storeSingle'])->name('prediksi.single.store');
         Route::get('prediksi/batch', [\App\Http\Controllers\PrediksiController::class, 'createBatch'])->name('prediksi.batch');
+        Route::get('prediksi/batch-template', [\App\Http\Controllers\PrediksiController::class, 'downloadBatchTemplate'])->name('prediksi.batch.template');
         Route::post('prediksi/batch', [\App\Http\Controllers\PrediksiController::class, 'storeBatch'])->name('prediksi.batch.store');
         Route::get('prediksi/batch/{batch}', [\App\Http\Controllers\PrediksiController::class, 'showBatch'])->name('prediksi.batch.show');
         Route::get('prediksi/batch/{batch}/export', [\App\Http\Controllers\PrediksiController::class, 'exportBatch'])->name('prediksi.batch.export');
@@ -86,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('prediksi/single', [\App\Http\Controllers\PrediksiController::class, 'createSingle'])->name('prediksi.single');
         Route::post('prediksi/single', [\App\Http\Controllers\PrediksiController::class, 'storeSingle'])->name('prediksi.single.store');
         Route::get('prediksi/batch', [\App\Http\Controllers\PrediksiController::class, 'createBatch'])->name('prediksi.batch');
+        Route::get('prediksi/batch-template', [\App\Http\Controllers\PrediksiController::class, 'downloadBatchTemplate'])->name('prediksi.batch.template');
         Route::post('prediksi/batch', [\App\Http\Controllers\PrediksiController::class, 'storeBatch'])->name('prediksi.batch.store');
         Route::get('prediksi/batch/{batch}', [\App\Http\Controllers\PrediksiController::class, 'showBatch'])->name('prediksi.batch.show');
         Route::get('prediksi/batch/{batch}/export', [\App\Http\Controllers\PrediksiController::class, 'exportBatch'])->name('prediksi.batch.export');

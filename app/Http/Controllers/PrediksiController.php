@@ -9,6 +9,7 @@ use App\Models\Prediksi;
 use App\Models\PrediksiBatch;
 use App\Services\C45EngineService;
 use App\Services\DataPreprocessingService;
+use App\Services\SpreadsheetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -179,6 +180,82 @@ class PrediksiController extends Controller
     }
 
     /**
+     * Download Excel batch prediction import template
+     */
+    public function downloadBatchTemplate(): StreamedResponse
+    {
+        return SpreadsheetService::downloadBatchPredictionTemplate();
+    }
+
+    /**
+     * Detect column indices from spreadsheet header row dynamically
+     */
+    public static function detectColumnIndices(array $headerRow): array
+    {
+        $normalizedHeaders = [];
+        foreach ($headerRow as $idx => $val) {
+            $clean = strtolower(trim(preg_replace('/[^a-zA-Z0-9]/', '', (string) $val)));
+            $normalizedHeaders[$idx] = $clean;
+        }
+
+        $aliasMap = [
+            'nim' => ['nim', 'nomorinduk', 'nomorindukmahasiswa', 'studentnumber', 'noid'],
+            'nama' => ['nama', 'namamahasiswa', 'namalengkap', 'studentname', 'name'],
+            'semester' => ['semester', 'smt', 'sem'],
+            'ips' => ['ips', 'ipsemester', 'indeksprestasisemester', 'gpa'],
+            'ipk' => ['ipk', 'ipkumulatif', 'indeksprestasikumulatif', 'cgpa'],
+            'sks_semester' => ['skssemester', 'sks', 'sksdiambil', 'credits'],
+            'sks_tidak_lulus' => ['skstidaklulus', 'sksgagal', 'skstl', 'failedcredits', 'tidaklulus'],
+            'kehadiran' => ['kehadiran', 'persentasekehadiran', 'presensi', 'kehadiranpersen', 'attendance'],
+            'status_cuti' => ['statuscuti', 'cuti', 'iscuti', 'leave'],
+        ];
+
+        $detected = [];
+        foreach ($aliasMap as $field => $aliases) {
+            foreach ($normalizedHeaders as $idx => $clean) {
+                if (in_array($clean, $aliases, true)) {
+                    $detected[$field] = $idx;
+                    break;
+                }
+            }
+        }
+
+        // If at least 2 essential academic columns (ipk and kehadiran) are detected by header
+        if (isset($detected['ipk']) && isset($detected['kehadiran'])) {
+            return $detected;
+        }
+
+        // Otherwise fallback based on total columns:
+        // 9-column standard batch template
+        if (count($headerRow) <= 10) {
+            return [
+                'nim' => 0,
+                'nama' => 1,
+                'semester' => 2,
+                'ips' => 3,
+                'ipk' => 4,
+                'sks_semester' => 5,
+                'sks_tidak_lulus' => 6,
+                'kehadiran' => 7,
+                'status_cuti' => 8,
+            ];
+        }
+
+        // Legacy 17-column academic dataset format
+        return [
+            'nim' => 0,
+            'nama' => 1,
+            'semester' => 8,
+            'ips' => 10,
+            'ipk' => 11,
+            'sks_semester' => 12,
+            'sks_tidak_lulus' => 14,
+            'kehadiran' => 15,
+            'status_cuti' => 16,
+        ];
+    }
+
+    /**
      * Show batch prediction upload form
      */
     public function createBatch()
@@ -188,7 +265,7 @@ class PrediksiController extends Controller
     }
 
     /**
-     * Process batch prediction from uploaded Excel file
+     * Process batch prediction from uploaded Excel file with flexible mapping and row validation
      */
     public function storeBatch(Request $request)
     {
@@ -206,12 +283,13 @@ class PrediksiController extends Controller
         $rows = $sheet->toArray();
 
         if (count($rows) <= 1) {
-            return back()->with('error', 'File Excel kosong atau tidak memiliki baris data.');
+            return back()->with('error', 'Berkas spreadsheet kosong atau tidak memiliki baris data.');
         }
 
-        array_shift($rows); // Remove header
-        $treeArray = json_decode($activeModel->tree_structure_json, true) ?? [];
+        $headerRow = array_shift($rows); // Extract header
+        $colMap = self::detectColumnIndices($headerRow);
 
+        $treeArray = json_decode($activeModel->tree_structure_json, true) ?? [];
         $batchCode = 'BATCH-' . date('Ymd-His') . '-' . strtoupper(substr(uniqid(), -4));
 
         DB::beginTransaction();
@@ -221,6 +299,7 @@ class PrediksiController extends Controller
             $totalRendah = 0;
             $totalSedang = 0;
             $totalTinggi = 0;
+            $errorLogs = [];
 
             $batch = PrediksiBatch::create([
                 'batch_code' => $batchCode,
@@ -230,25 +309,71 @@ class PrediksiController extends Controller
                 'total_rendah' => 0,
                 'total_sedang' => 0,
                 'total_tinggi' => 0,
+                'skipped_records' => 0,
+                'error_logs' => null,
                 'created_by' => Auth::id(),
             ]);
 
-            foreach ($rows as $row) {
-                $nim = trim((string) ($row[0] ?? ''));
-                $nama = trim((string) ($row[1] ?? ''));
+            foreach ($rows as $rowIndex => $row) {
+                $excelRowNum = $rowIndex + 2;
 
-                if (empty($nama) && empty($nim)) {
+                // Skip entirely empty row
+                $nonEmptyCells = array_filter($row, fn($cell) => $cell !== null && trim((string)$cell) !== '');
+                if (empty($nonEmptyCells)) {
                     continue;
                 }
 
-                $semester = (int) ($row[8] ?? 1);
-                $ips = (float) str_replace(',', '.', (string) ($row[10] ?? 0));
-                $ipk = (float) str_replace(',', '.', (string) ($row[11] ?? 0));
-                $sksSemester = (int) ($row[12] ?? 20);
-                $sksTidakLulus = (int) ($row[14] ?? 0);
-                $kehadiran = (float) str_replace(',', '.', (string) ($row[15] ?? 85.0));
-                $cutiStr = strtolower(trim((string) ($row[16] ?? 'tidak')));
-                $isCuti = in_array($cutiStr, ['ya', '1', 'true', 'cuti']);
+                $nim = trim((string) ($row[$colMap['nim'] ?? 0] ?? ''));
+                $nama = trim((string) ($row[$colMap['nama'] ?? 1] ?? ''));
+
+                if (empty($nama) && empty($nim)) {
+                    $errorLogs[] = [
+                        'row' => $excelRowNum,
+                        'nim' => '-',
+                        'nama' => '-',
+                        'reason' => 'NIM dan Nama Mahasiswa kosong.',
+                    ];
+                    continue;
+                }
+
+                $ipkRaw = trim((string) ($row[$colMap['ipk'] ?? 4] ?? ''));
+                $cleanIpkStr = str_replace(',', '.', $ipkRaw);
+                if ($cleanIpkStr === '' || !is_numeric($cleanIpkStr) || (float)$cleanIpkStr < 0.0 || (float)$cleanIpkStr > 4.00) {
+                    $errorLogs[] = [
+                        'row' => $excelRowNum,
+                        'nim' => $nim ?: '-',
+                        'nama' => $nama ?: '-',
+                        'reason' => "Nilai IPK '{$ipkRaw}' tidak valid (wajib berupa angka antara 0.00 - 4.00).",
+                    ];
+                    continue;
+                }
+                $ipk = (float) $cleanIpkStr;
+
+                $kehadiranRaw = trim((string) ($row[$colMap['kehadiran'] ?? 7] ?? ''));
+                $cleanKehadiranStr = str_replace(',', '.', $kehadiranRaw);
+                if ($cleanKehadiranStr === '' || !is_numeric($cleanKehadiranStr) || (float)$cleanKehadiranStr < 0.0 || (float)$cleanKehadiranStr > 100.0) {
+                    $errorLogs[] = [
+                        'row' => $excelRowNum,
+                        'nim' => $nim ?: '-',
+                        'nama' => $nama ?: '-',
+                        'reason' => "Persentase kehadiran '{$kehadiranRaw}' tidak valid (wajib berupa angka 0 - 100%).",
+                    ];
+                    continue;
+                }
+                $kehadiran = (float) $cleanKehadiranStr;
+
+                $ipsRaw = trim((string) ($row[$colMap['ips'] ?? 3] ?? ''));
+                $cleanIpsStr = str_replace(',', '.', $ipsRaw);
+                $ips = is_numeric($cleanIpsStr) ? max(0.0, min(4.00, (float)$cleanIpsStr)) : $ipk;
+
+                $semesterRaw = (int) ($row[$colMap['semester'] ?? 2] ?? 1);
+                $semester = ($semesterRaw >= 1 && $semesterRaw <= 14) ? $semesterRaw : 1;
+
+                $sksSemester = max(0, min(30, (int) ($row[$colMap['sks_semester'] ?? 5] ?? 20)));
+                $sksTidakLulus = max(0, (int) ($row[$colMap['sks_tidak_lulus'] ?? 6] ?? 0));
+
+                $cutiStr = strtolower(trim((string) ($row[$colMap['status_cuti'] ?? 8] ?? 'tidak')));
+                $isCuti = in_array($cutiStr, ['ya', '1', 'true', 'cuti', 'y']);
 
                 $inputCategories = [
                     'kategori_ipk' => DataPreprocessingService::categorizeIpk($ipk),
@@ -303,17 +428,37 @@ class PrediksiController extends Controller
                 $totalRecords++;
             }
 
+            if ($totalRecords === 0) {
+                DB::rollBack();
+                $errDetails = !empty($errorLogs)
+                    ? ': ' . implode(' | ', array_map(fn($e) => "Baris {$e['row']} ({$e['reason']})", array_slice($errorLogs, 0, 3)))
+                    : '.';
+                return back()->withInput()->with('error', 'Gagal memproses batch prediksi: Tidak ada baris data mahasiswa yang valid ditemukan' . $errDetails);
+            }
+
+            $skippedCount = count($errorLogs);
+
             $batch->update([
                 'total_records' => $totalRecords,
                 'total_rendah' => $totalRendah,
                 'total_sedang' => $totalSedang,
                 'total_tinggi' => $totalTinggi,
+                'skipped_records' => $skippedCount,
+                'error_logs' => !empty($errorLogs) ? $errorLogs : null,
             ]);
 
             DB::commit();
 
-            return redirect()->route('admin.prediksi.batch.show', $batch)
-                ->with('success', "Prediksi massal selesai! Total {$totalRecords} mahasiswa berhasil diklasifikasikan.");
+            $redirectRoute = auth()->user()->isAdmin()
+                ? route('admin.prediksi.batch.show', $batch)
+                : route('prodi.prediksi.batch.show', $batch);
+
+            $flashMsg = "Prediksi massal selesai! Total {$totalRecords} mahasiswa berhasil diklasifikasikan.";
+            if ($skippedCount > 0) {
+                $flashMsg .= " Catatan: {$skippedCount} baris data dilewati karena format data tidak valid.";
+            }
+
+            return redirect($redirectRoute)->with('success', $flashMsg);
 
         } catch (\Exception $e) {
             DB::rollBack();

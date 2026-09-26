@@ -21,8 +21,22 @@ class PrediksiBatch extends Model
         'total_rendah',
         'total_sedang',
         'total_tinggi',
+        'skipped_records',
+        'error_logs',
         'created_by',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'total_records' => 'integer',
+            'total_rendah' => 'integer',
+            'total_sedang' => 'integer',
+            'total_tinggi' => 'integer',
+            'skipped_records' => 'integer',
+            'error_logs' => 'array',
+        ];
+    }
 
     public function model(): BelongsTo
     {
