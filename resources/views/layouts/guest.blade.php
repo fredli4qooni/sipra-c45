@@ -16,6 +16,18 @@
     <script>
         tailwind.config = {
             theme: {
+                borderRadius: {
+                    'none': '0px',
+                    'xs': '2px',
+                    'sm': '3px',
+                    'DEFAULT': '4px',
+                    'md': '6px',
+                    'lg': '8px',
+                    'xl': '10px',
+                    '2xl': '12px',
+                    '3xl': '14px',
+                    'full': '9999px',
+                },
                 extend: {
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],

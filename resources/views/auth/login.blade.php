@@ -7,20 +7,20 @@
 
     <!-- Header Logo & Branding -->
     <div class="text-center space-y-2">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-50 border border-brand-200 text-brand-600 shadow-xs mb-1">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-50 border border-brand-200 text-brand-600 shadow-xs mb-1">
             <i data-lucide="brain-circuit" class="w-6 h-6"></i>
         </div>
         <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">SIPRA-C4.5</h2>
         <p class="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
             Portal Prediksi Akademik Mahasiswa Berbasis Decision Tree C4.5
         </p>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200">
             UIN Raden Intan Lampung
         </span>
     </div>
 
     <!-- Main Login Card -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8 space-y-6">
+    <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 sm:p-8 space-y-6">
         
         <div class="border-b border-slate-100 pb-3">
             <h3 class="text-base font-bold text-slate-900">Masuk ke Akun</h3>
@@ -28,7 +28,7 @@
         </div>
 
         @if(session('error'))
-            <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2.5">
+            <div class="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start space-x-2.5">
                 <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5"></i>
                 <div class="leading-relaxed">{{ session('error') }}</div>
             </div>
@@ -54,7 +54,7 @@
                         required 
                         autofocus
                         placeholder="contoh: admin@uinril.ac.id atau 2271020052"
-                        class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+                        class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
                     >
                 </div>
                 @error('login_identifier')
@@ -79,7 +79,7 @@
                         id="password" 
                         required 
                         placeholder="••••••••"
-                        class="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+                        class="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
                     >
                     <button 
                         type="button" 
@@ -99,7 +99,7 @@
             <!-- Submit Button -->
             <button 
                 type="submit" 
-                class="w-full py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-xs hover:shadow-sm transition flex items-center justify-center space-x-2"
+                class="w-full py-2.5 px-4 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-xs hover:shadow-sm transition flex items-center justify-center space-x-2"
             >
                 <span>Masuk Sekarang</span>
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>

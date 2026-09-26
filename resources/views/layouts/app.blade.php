@@ -16,6 +16,18 @@
     <script>
         tailwind.config = {
             theme: {
+                borderRadius: {
+                    'none': '0px',
+                    'xs': '2px',
+                    'sm': '3px',
+                    'DEFAULT': '4px',
+                    'md': '6px',
+                    'lg': '8px',
+                    'xl': '10px',
+                    '2xl': '12px',
+                    '3xl': '14px',
+                    'full': '9999px',
+                },
                 extend: {
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -92,7 +104,7 @@
             
             <!-- Top Section: User Profile Card (Matching Reference Design) -->
             <div class="p-4 border-b border-slate-100">
-                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-slate-300 transition space-y-3">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 hover:border-slate-300 transition space-y-3">
                     
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3 min-w-0">
@@ -102,7 +114,7 @@
                                 $words = explode(' ', $name);
                                 $initials = strtoupper(substr($words[0], 0, 1) . (isset($words[1]) ? substr($words[1], 0, 1) : ''));
                             @endphp
-                            <div class="w-10 h-10 rounded-xl bg-brand-600 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                            <div class="w-10 h-10 rounded-lg bg-brand-600 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
                                 {{ $initials }}
                             </div>
                             <div class="min-w-0 flex-1">
@@ -112,7 +124,7 @@
                                 </p>
                             </div>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider
                             @if(auth()->user()->isAdmin()) bg-purple-50 text-purple-700 border border-purple-200/60
                             @elseif(auth()->user()->isProdi()) bg-blue-50 text-blue-700 border border-blue-200/60
                             @elseif(auth()->user()->isDosenPa()) bg-amber-50 text-amber-700 border border-amber-200/60
@@ -124,17 +136,17 @@
 
                     <!-- Quick Action Mini Pills (Profile, Bantuan, Logout) -->
                     <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-200/60">
-                        <a href="{{ route('profile.edit') }}" class="flex flex-col items-center justify-center p-1.5 rounded-xl bg-white hover:bg-slate-100/80 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[10px] font-semibold transition">
+                        <a href="{{ route('profile.edit') }}" class="flex flex-col items-center justify-center p-1.5 rounded-lg bg-white hover:bg-slate-100/80 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[10px] font-semibold transition">
                             <i data-lucide="user" class="w-3.5 h-3.5 mb-0.5 text-slate-500"></i>
                             <span>Profil</span>
                         </a>
-                        <a href="{{ route('bantuan') }}" class="flex flex-col items-center justify-center p-1.5 rounded-xl bg-white hover:bg-slate-100/80 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[10px] font-semibold transition">
+                        <a href="{{ route('bantuan') }}" class="flex flex-col items-center justify-center p-1.5 rounded-lg bg-white hover:bg-slate-100/80 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[10px] font-semibold transition">
                             <i data-lucide="help-circle" class="w-3.5 h-3.5 mb-0.5 text-slate-500"></i>
                             <span>Bantuan</span>
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
                             @csrf
-                            <button type="submit" class="w-full h-full flex flex-col items-center justify-center p-1.5 rounded-xl bg-white hover:bg-rose-50 border border-slate-200/60 text-slate-600 hover:text-rose-600 text-[10px] font-semibold transition">
+                            <button type="submit" class="w-full h-full flex flex-col items-center justify-center p-1.5 rounded-lg bg-white hover:bg-rose-50 border border-slate-200/60 text-slate-600 hover:text-rose-600 text-[10px] font-semibold transition">
                                 <i data-lucide="log-out" class="w-3.5 h-3.5 mb-0.5 text-slate-500 group-hover:text-rose-500"></i>
                                 <span>Keluar</span>
                             </button>
@@ -155,7 +167,7 @@
                         $dashRoute = route('dashboard');
                         $isDash = request()->routeIs('*dashboard');
                     @endphp
-                    <a href="{{ $dashRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ $isDash ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                    <a href="{{ $dashRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ $isDash ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                         <i data-lucide="layout-grid" class="w-4 h-4 {{ $isDash ? 'text-brand-600' : 'text-slate-400' }}"></i>
                         <span>Overview Dasbor</span>
                     </a>
@@ -166,12 +178,12 @@
                     <div class="space-y-1">
                         <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Master Data</p>
                         
-                        <a href="{{ route('admin.mahasiswa.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('admin.mahasiswa.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ route('admin.mahasiswa.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('admin.mahasiswa.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="users" class="w-4 h-4 {{ request()->routeIs('admin.mahasiswa.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Data Mahasiswa</span>
                         </a>
 
-                        <a href="{{ route('admin.akademik.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('admin.akademik.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ route('admin.akademik.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('admin.akademik.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="graduation-cap" class="w-4 h-4 {{ request()->routeIs('admin.akademik.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Nilai & Akademik</span>
                         </a>
@@ -189,17 +201,17 @@
                             $rulesRoute = auth()->user()->isAdmin() ? route('admin.rules.index') : route('prodi.rules.index');
                         @endphp
 
-                        <a href="{{ $c45Route }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('*c45.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ $c45Route }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('*c45.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="cpu" class="w-4 h-4 {{ request()->routeIs('*c45.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Training & Evaluasi Model</span>
                         </a>
 
-                        <a href="{{ $treeRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('*tree.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ $treeRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('*tree.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="git-merge" class="w-4 h-4 {{ request()->routeIs('*tree.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Pohon Keputusan</span>
                         </a>
 
-                        <a href="{{ $rulesRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('*rules.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ $rulesRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('*rules.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="list-tree" class="w-4 h-4 {{ request()->routeIs('*rules.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Aturan Klasifikasi IF-THEN</span>
                         </a>
@@ -216,24 +228,24 @@
                             $ewsCount = \App\Models\DataAkademik::where('label_risiko_aktual', 'Risiko Tinggi')->count();
                         @endphp
 
-                        <a href="{{ $prediksiRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('*prediksi.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ $prediksiRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('*prediksi.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="play-circle" class="w-4 h-4 {{ request()->routeIs('*prediksi.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Simulasi & Prediksi Risiko</span>
                         </a>
 
-                        <a href="{{ $ewsRoute }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('*ews.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ $ewsRoute }}" class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('*ews.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <div class="flex items-center space-x-3">
                                 <i data-lucide="bell-ring" class="w-4 h-4 {{ request()->routeIs('*ews.*') ? 'text-rose-600' : 'text-slate-400' }}"></i>
                                 <span>Early Warning System</span>
                             </div>
                             @if($ewsCount > 0)
-                                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                                <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
                                     {{ $ewsCount }}
                                 </span>
                             @endif
                         </a>
 
-                        <a href="{{ $laporanRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('*laporan.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ $laporanRoute }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('*laporan.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="file-text" class="w-4 h-4 {{ request()->routeIs('*laporan.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Laporan & Rekapitulasi</span>
                         </a>
@@ -244,7 +256,7 @@
                 @if(auth()->user()->isMahasiswa())
                     <div class="space-y-1">
                         <p class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akademik Pribadi</p>
-                        <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center space-x-3 px-3 py-2 rounded-xl text-xs font-semibold transition {{ request()->routeIs('mahasiswa.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                        <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('mahasiswa.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="shield-alert" class="w-4 h-4 text-brand-600"></i>
                             <span>Status & Rekomendasi</span>
                         </a>
@@ -274,12 +286,12 @@
                 
                 <!-- Left: Mobile Toggle & Brand/Breadcrumb -->
                 <div class="flex items-center space-x-3 min-w-0">
-                    <button id="sidebar-toggle" class="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition">
+                    <button id="sidebar-toggle" class="lg:hidden p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">
                         <i data-lucide="menu" class="w-4 h-4"></i>
                     </button>
 
                     <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 rounded-xl bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-700 shadow-xs">
+                        <div class="w-8 h-8 rounded-lg bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-700 shadow-xs">
                             <i data-lucide="brain-circuit" class="w-4 h-4"></i>
                         </div>
                         <div class="hidden sm:block">
@@ -298,7 +310,7 @@
                         <input 
                             type="text" 
                             placeholder="Cari mahasiswa, NIM, atau menu..." 
-                            class="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+                            class="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
                         >
                     </div>
                 </div>
@@ -310,7 +322,7 @@
                         @php
                             $quickPrediksiRoute = auth()->user()->isAdmin() ? route('admin.prediksi.single') : route('prodi.prediksi.single');
                         @endphp
-                        <a href="{{ $quickPrediksiRoute }}" class="inline-flex items-center px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white shadow-xs transition">
+                        <a href="{{ $quickPrediksiRoute }}" class="inline-flex items-center px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white shadow-xs transition">
                             <i data-lucide="plus" class="w-3.5 h-3.5 mr-1.5"></i>
                             <span>Simulasi Prediksi</span>
                         </a>
@@ -320,12 +332,12 @@
 
                     <!-- User Initials Pill & Logout -->
                     <div class="flex items-center pl-2 space-x-1.5 border-l border-slate-200">
-                        <a href="{{ route('profile.edit') }}" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 font-bold text-xs flex items-center justify-center transition" title="Edit Profil">
+                        <a href="{{ route('profile.edit') }}" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 font-bold text-xs flex items-center justify-center transition" title="Edit Profil">
                             {{ $initials }}
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
-                            <button type="submit" title="Keluar dari Sistem" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+                            <button type="submit" title="Keluar dari Sistem" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
                                 <i data-lucide="log-out" class="w-4 h-4"></i>
                             </button>
                         </form>
@@ -353,7 +365,7 @@
 
                 <!-- Flash Alert Messages -->
                 @if(session('success'))
-                    <div class="p-4 rounded-2xl bg-brand-50 border border-brand-200/80 text-brand-900 flex items-start space-x-3 shadow-xs">
+                    <div class="p-4 rounded-lg bg-brand-50 border border-brand-200/80 text-brand-900 flex items-start space-x-3 shadow-xs">
                         <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5"></i>
                         <div class="text-xs font-medium leading-relaxed">
                             <strong class="font-bold">Berhasil!</strong> {{ session('success') }}
@@ -362,7 +374,7 @@
                 @endif
 
                 @if(session('error'))
-                    <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-900 flex items-start space-x-3 shadow-xs">
+                    <div class="p-4 rounded-lg bg-rose-50 border border-rose-200/80 text-rose-900 flex items-start space-x-3 shadow-xs">
                         <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5"></i>
                         <div class="text-xs font-medium leading-relaxed">
                             <strong class="font-bold">Perhatian:</strong> {{ session('error') }}
@@ -371,7 +383,7 @@
                 @endif
 
                 @if($errors->any())
-                    <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-900 space-y-1 text-xs shadow-xs">
+                    <div class="p-4 rounded-lg bg-rose-50 border border-rose-200/80 text-rose-900 space-y-1 text-xs shadow-xs">
                         <div class="flex items-center space-x-2 font-bold">
                             <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600"></i>
                             <span>Terdapat kesalahan pada formulir:</span>

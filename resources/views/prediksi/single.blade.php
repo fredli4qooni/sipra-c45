@@ -7,9 +7,9 @@
 <div class="max-w-4xl mx-auto space-y-6">
 
     <!-- Active Model Banner -->
-    <div class="p-4 rounded-2xl bg-brand-50 border border-brand-200 flex items-center justify-between">
+    <div class="p-4 rounded-xl bg-brand-50 border border-brand-200 flex items-center justify-between">
         <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xs">
+            <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-xs">
                 <i data-lucide="cpu" class="w-4 h-4"></i>
             </div>
             <div>
@@ -23,11 +23,11 @@
     </div>
 
     <!-- Prediction Form Card -->
-    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
+    <div class="bg-white p-6 sm:p-8 rounded-xl border border-slate-200/80 shadow-xs space-y-6">
         
         <div class="flex items-center justify-between pb-4 border-b border-slate-100">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center">
                     <i data-lucide="sparkles" class="w-5 h-5"></i>
                 </div>
                 <div>
@@ -35,7 +35,7 @@
                     <p class="text-xs text-slate-500">Pilih mahasiswa terdaftar atau masukkan parameter simulasi manual</p>
                 </div>
             </div>
-            <a href="{{ auth()->user()->isAdmin() ? route('admin.prediksi.index') : route('prodi.prediksi.index') }}" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.prediksi.index') : route('prodi.prediksi.index') }}" class="px-3 py-1.5 rounded-lg bg-slate-100 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
                 Kembali
             </a>
         </div>
@@ -48,12 +48,12 @@
             @csrf
 
             <!-- Quick Auto-Fill Selector -->
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
                 <label class="block text-xs font-bold text-brand-700 uppercase tracking-wider flex items-center">
                     <i data-lucide="user-search" class="w-4 h-4 mr-1.5"></i>
                     Pilih Data Mahasiswa (Auto-Fill Otomatis)
                 </label>
-                <select id="mhs-selector" onchange="autoFillStudentData(this)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                <select id="mhs-selector" onchange="autoFillStudentData(this)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                     <option value="">-- Pilih Mahasiswa atau Isi Bebas di Bawah --</option>
                     @foreach($mahasiswas as $mhs)
                         @php $akd = $mhs->latestAkademik; @endphp
@@ -82,13 +82,13 @@
                 <!-- NIM -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">NIM Mahasiswa</label>
-                    <input type="text" name="nim" id="nim" value="{{ old('nim') }}" placeholder="contoh: 2271020052" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-mono transition">
+                    <input type="text" name="nim" id="nim" value="{{ old('nim') }}" placeholder="contoh: 2271020052" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-mono transition">
                 </div>
 
                 <!-- Nama -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Mahasiswa <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_mahasiswa" id="nama_mahasiswa" value="{{ old('nama_mahasiswa') }}" required placeholder="Nama lengkap mahasiswa" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <input type="text" name="nama_mahasiswa" id="nama_mahasiswa" value="{{ old('nama_mahasiswa') }}" required placeholder="Nama lengkap mahasiswa" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                     @error('nama_mahasiswa') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -97,7 +97,7 @@
                 <!-- Semester -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Semester Saat Ini <span class="text-rose-500">*</span></label>
-                    <select name="semester" id="semester" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <select name="semester" id="semester" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                         @for($i = 1; $i <= 10; $i++)
                             <option value="{{ $i }}" {{ old('semester', 4) == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
                         @endfor
@@ -107,13 +107,13 @@
                 <!-- IPS -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">IPS Terakhir <span class="text-rose-500">*</span></label>
-                    <input type="number" step="0.01" min="0" max="4.00" name="ips" id="ips" value="{{ old('ips', '3.20') }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <input type="number" step="0.01" min="0" max="4.00" name="ips" id="ips" value="{{ old('ips', '3.20') }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                 </div>
 
                 <!-- IPK -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">IPK Kumulatif <span class="text-rose-500">*</span></label>
-                    <input type="number" step="0.01" min="0" max="4.00" name="ipk" id="ipk" value="{{ old('ipk', '3.15') }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <input type="number" step="0.01" min="0" max="4.00" name="ipk" id="ipk" value="{{ old('ipk', '3.15') }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                 </div>
             </div>
 
@@ -121,19 +121,19 @@
                 <!-- SKS Semester -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">SKS Diambil <span class="text-rose-500">*</span></label>
-                    <input type="number" min="0" max="30" name="sks_semester" id="sks_semester" value="{{ old('sks_semester', 20) }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <input type="number" min="0" max="30" name="sks_semester" id="sks_semester" value="{{ old('sks_semester', 20) }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                 </div>
 
                 <!-- SKS Tidak Lulus -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">SKS Gagal (D/E) <span class="text-rose-500">*</span></label>
-                    <input type="number" min="0" max="60" name="sks_tidak_lulus" id="sks_tidak_lulus" value="{{ old('sks_tidak_lulus', 0) }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <input type="number" min="0" max="60" name="sks_tidak_lulus" id="sks_tidak_lulus" value="{{ old('sks_tidak_lulus', 0) }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                 </div>
 
                 <!-- Persentase Kehadiran -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Kehadiran (%) <span class="text-rose-500">*</span></label>
-                    <input type="number" step="0.1" min="0" max="100.0" name="persentase_kehadiran" id="persentase_kehadiran" value="{{ old('persentase_kehadiran', 88.0) }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <input type="number" step="0.1" min="0" max="100.0" name="persentase_kehadiran" id="persentase_kehadiran" value="{{ old('persentase_kehadiran', 88.0) }}" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                 </div>
             </div>
 
@@ -147,10 +147,10 @@
 
             <!-- Submit Button -->
             <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-100">
-                <a href="{{ auth()->user()->isAdmin() ? route('admin.prediksi.index') : route('prodi.prediksi.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+                <a href="{{ auth()->user()->isAdmin() ? route('admin.prediksi.index') : route('prodi.prediksi.index') }}" class="px-4 py-2.5 rounded-lg bg-slate-100 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
                     Batal
                 </a>
-                <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-xs transition flex items-center">
+                <button type="submit" class="px-6 py-2.5 rounded-lg text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-xs transition flex items-center">
                     <i data-lucide="brain-circuit" class="w-4 h-4 mr-2"></i>
                     Jalankan Prediksi Risiko C4.5
                 </button>

@@ -7,7 +7,7 @@
 <div class="space-y-6">
 
     <!-- Model Switcher & Toolbar Header -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h3 class="text-base font-bold text-slate-900">Struktur Hierarki Pohon Keputusan</h3>
             <p class="text-xs text-slate-500">
@@ -19,7 +19,7 @@
         <div class="flex flex-wrap items-center gap-2">
             <!-- Model Switcher -->
             <form method="GET" action="{{ auth()->user()->isAdmin() ? route('admin.tree.show') : route('prodi.tree.show') }}" class="flex items-center">
-                <select name="c45" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                <select name="c45" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                     @foreach($allModels as $m)
                         <option value="{{ $m->id }}" {{ ($c45 && $c45->id === $m->id) ? 'selected' : '' }}>
                             {{ $m->nama_model }} ({{ $m->accuracy }}% {{ $m->is_active ? '• Aktif' : '' }})
@@ -28,7 +28,7 @@
                 </select>
             </form>
 
-            <a href="{{ auth()->user()->isAdmin() ? route('admin.rules.index', ['c45' => $c45?->id]) : route('prodi.rules.index', ['c45' => $c45?->id]) }}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center">
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.rules.index', ['c45' => $c45?->id]) : route('prodi.rules.index', ['c45' => $c45?->id]) }}" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center">
                 <i data-lucide="list-tree" class="w-4 h-4 mr-1.5 text-amber-600"></i>
                 Buka Aturan IF-THEN
             </a>
@@ -36,19 +36,19 @@
     </div>
 
     @if(!$c45 || empty($treeArray))
-        <div class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs text-center text-slate-400 space-y-2">
+        <div class="bg-white p-8 rounded-xl border border-slate-200/80 shadow-xs text-center text-slate-400 space-y-2">
             <i data-lucide="git-commit" class="w-12 h-12 mx-auto text-slate-300"></i>
             <p class="text-sm">Belum ada struktur pohon keputusan yang tersedia. Silakan latih model terlebih dahulu.</p>
         </div>
     @else
         <!-- Visual Decision Tree Canvas Card -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+        <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
             
             <!-- Clean Responsive Toolbar & Legend Bar -->
             <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <!-- Left Title & Subtitle -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center flex-shrink-0 border border-brand-200/60">
+                    <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center flex-shrink-0 border border-brand-200/60">
                         <i data-lucide="git-merge" class="w-4 h-4"></i>
                     </div>
                     <div>
@@ -60,20 +60,20 @@
                 <!-- Right Controls & Encapsulated Legend Toolbar -->
                 <div class="flex flex-wrap items-center gap-3">
                     <!-- Legend Chips in a clean horizontal container -->
-                    <div class="hidden sm:flex items-center gap-1.5 p-1 bg-slate-50 border border-slate-200 rounded-xl text-[10px]">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-bold">
+                    <div class="hidden sm:flex items-center gap-1.5 p-1 bg-slate-50 border border-slate-200 rounded-lg text-[10px]">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1"></span> Root
                         </span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-white text-slate-700 font-bold border border-slate-200">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-white text-slate-700 font-bold border border-slate-200">
                             <span class="w-1.5 h-1.5 rounded-full bg-slate-500 mr-1"></span> Uji
                         </span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-900 font-bold">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 font-bold">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span> Rendah
                         </span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-amber-100 text-amber-900 font-bold">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1"></span> Sedang
                         </span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-rose-100 text-rose-900 font-bold">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-rose-100 text-rose-900 font-bold">
                             <span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1"></span> Tinggi
                         </span>
                     </div>
@@ -83,17 +83,17 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center space-x-1.5">
-                        <button type="button" onclick="zoomInTree()" title="Perbesar (Zoom In)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+                        <button type="button" onclick="zoomInTree()" title="Perbesar (Zoom In)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
                             <i data-lucide="zoom-in" class="w-4 h-4"></i>
                         </button>
-                        <button type="button" onclick="zoomOutTree()" title="Perkecil (Zoom Out)" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+                        <button type="button" onclick="zoomOutTree()" title="Perkecil (Zoom Out)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
                             <i data-lucide="zoom-out" class="w-4 h-4"></i>
                         </button>
-                        <button type="button" onclick="fitTreeToView()" title="Pusatkan Tampilan" class="px-3 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center whitespace-nowrap">
+                        <button type="button" onclick="fitTreeToView()" title="Pusatkan Tampilan" class="px-3 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center whitespace-nowrap">
                             <i data-lucide="maximize-2" class="w-3.5 h-3.5 mr-1 text-slate-500"></i>
                             Pusatkan
                         </button>
-                        <button type="button" onclick="toggleTreeMode()" id="toggleViewBtn" class="px-3.5 h-8 rounded-xl bg-brand-50 hover:bg-brand-100 border border-brand-200 text-xs font-bold text-brand-700 transition flex items-center whitespace-nowrap">
+                        <button type="button" onclick="toggleTreeMode()" id="toggleViewBtn" class="px-3.5 h-8 rounded-lg bg-brand-50 hover:bg-brand-100 border border-brand-200 text-xs font-bold text-brand-700 transition flex items-center whitespace-nowrap">
                             <i data-lucide="list" class="w-3.5 h-3.5 mr-1.5"></i>
                             Mode Teks
                         </button>
@@ -139,12 +139,12 @@
             @endphp
 
             <!-- 1. D3 SVG INTERACTIVE VECTOR TREE CANVAS -->
-            <div id="d3TreeCanvasWrapper" class="w-full bg-slate-50/70 rounded-2xl border border-slate-200 overflow-hidden relative cursor-grab active:cursor-grabbing" style="height: 600px;">
+            <div id="d3TreeCanvasWrapper" class="w-full bg-slate-50/70 rounded-xl border border-slate-200 overflow-hidden relative cursor-grab active:cursor-grabbing" style="height: 600px;">
                 <svg id="decisionTreeSvg" class="w-full h-full"></svg>
             </div>
 
             <!-- 2. TEXT/INDENT OUTLINE VIEW (Alternative View) -->
-            <div id="textOutlineContainer" class="hidden p-6 bg-slate-50/70 rounded-2xl border border-slate-200 space-y-4">
+            <div id="textOutlineContainer" class="hidden p-6 bg-slate-50/70 rounded-xl border border-slate-200 space-y-4">
                 @php
                     if (!function_exists('renderTreeNode')) {
                         function renderTreeNode($node, $depth = 1) {
@@ -161,8 +161,8 @@
                                     default => 'bg-rose-600 text-white',
                                 };
 
-                                echo '<div class="inline-flex items-center space-x-2.5 p-3 rounded-2xl border shadow-xs ' . $colorClass . ' my-1 bg-white">';
-                                echo '  <div class="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs ' . $badgeColor . '">✓</div>';
+                                echo '<div class="inline-flex items-center space-x-2.5 p-3 rounded-lg border shadow-xs ' . $colorClass . ' my-1 bg-white">';
+                                echo '  <div class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs ' . $badgeColor . '">✓</div>';
                                 echo '  <div>';
                                 echo '    <p class="text-xs font-bold uppercase tracking-wider">' . e($decision) . '</p>';
                                 echo '    <p class="text-[10px] text-slate-500">Confidence: ' . $node['confidence'] . '% (' . $node['samples_count'] . ' sampel)</p>';
@@ -172,7 +172,7 @@
                             }
 
                             echo '<div class="space-y-3 my-2">';
-                            echo '  <div class="inline-flex items-center space-x-2.5 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-900 shadow-xs">';
+                            echo '  <div class="inline-flex items-center space-x-2.5 px-4 py-2.5 rounded-lg bg-white border border-slate-200 text-slate-900 shadow-xs">';
                             echo '    <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>';
                             echo '    <span class="text-xs font-extrabold uppercase tracking-wide">UJI: ' . str_replace('_', ' ', strtoupper($node['attribute'])) . '</span>';
                             echo '    <span class="text-[10px] px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 border border-brand-200 font-mono font-bold">Gain Ratio: ' . $node['gain_ratio'] . '</span>';
