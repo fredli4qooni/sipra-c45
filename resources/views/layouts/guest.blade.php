@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-[#f8fafc]">
+<html lang="id" class="h-full bg-slate-950">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Login') — SIPRA-C4.5 UIN Raden Intan Lampung</title>
+    <title>@yield('title', 'Masuk ke Sistem') — SIPRA-C4.5 UIN Raden Intan Lampung</title>
 
     <!-- Google Fonts: Outfit (Display & Headings) + Plus Jakarta Sans (Body) + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,6 +49,15 @@
                             900: '#064e3b',
                             950: '#022c22',
                         }
+                    },
+                    keyframes: {
+                        pulseSlow: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+                            '50%': { opacity: '0.8', transform: 'scale(1.05)' },
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulseSlow 6s ease-in-out infinite',
                     }
                 }
             }
@@ -61,7 +70,6 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            color: #0f172a;
         }
         h1, h2, h3, h4, h5, h6, .font-heading, .font-display {
             font-family: 'Outfit', sans-serif;
@@ -69,19 +77,16 @@
         }
     </style>
 </head>
-<body class="h-full flex flex-col items-center justify-center p-4 sm:p-6 bg-[#f8fafc] text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-900">
+<body class="min-h-full bg-slate-900 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
 
-    <div class="w-full max-w-md my-auto space-y-6">
-        @yield('content')
-    </div>
-
-    <footer class="mt-8 text-center text-xs text-slate-400">
-        <p>© {{ date('Y') }} <strong>SIPRA-C4.5</strong> • UIN Raden Intan Lampung</p>
-        <p class="text-[11px] text-slate-400 mt-0.5">Penelitian Skripsi: Pingky Hera Veliyanti (NIM: 2271020052)</p>
-    </footer>
+    @yield('content')
 
     <script>
-        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
     </script>
 </body>
 </html>
