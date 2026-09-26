@@ -86,6 +86,12 @@ class LaporanController extends Controller
             $query->where('label_risiko_aktual', $risiko);
         }
 
+        if ($jalur = $request->input('jalur_masuk')) {
+            $query->whereHas('mahasiswa', function ($q) use ($jalur) {
+                $q->where('jalur_masuk', $jalur);
+            });
+        }
+
         $records = $query->orderBy('semester', 'asc')->orderBy('mahasiswa_id', 'asc')->get();
 
         $totalRecords = $records->count();
@@ -95,13 +101,33 @@ class LaporanController extends Controller
 
         $activeModel = C45Model::active()->first();
 
+        // Smart multi-page partitioning for clean A4 printing
+        $page1Limit = max(5, (int) $request->input('limit_p1', 15));
+        $subsequentLimit = max(10, (int) $request->input('limit_p2', 22));
+
+        $pages = [];
+        if ($totalRecords <= $page1Limit) {
+            $pages[] = $records;
+        } else {
+            $pages[] = $records->slice(0, $page1Limit);
+            $remaining = $records->slice($page1Limit)->values();
+            foreach ($remaining->chunk($subsequentLimit) as $chunk) {
+                $pages[] = $chunk;
+            }
+        }
+        $totalPages = max(1, count($pages));
+
         return view('laporan.print', compact(
             'records',
+            'pages',
+            'totalPages',
             'totalRecords',
             'totalRendah',
             'totalSedang',
             'totalTinggi',
-            'activeModel'
+            'activeModel',
+            'page1Limit',
+            'subsequentLimit'
         ));
     }
 
