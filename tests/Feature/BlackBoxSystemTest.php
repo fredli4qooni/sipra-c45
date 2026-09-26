@@ -50,7 +50,7 @@ class BlackBoxSystemTest extends TestCase
 
         // 3. Create Student
         $mhsRes = $this->actingAs($this->admin)->post(route('admin.mahasiswa.store'), [
-            'nim' => '2271020088',
+            'nim' => '2271029998',
             'nama' => 'Budi Blackbox Test',
             'angkatan' => 2022,
             'jenis_kelamin' => 'L',
@@ -58,7 +58,7 @@ class BlackBoxSystemTest extends TestCase
             'status_mahasiswa' => 'Aktif',
         ]);
         $mhsRes->assertRedirect(route('admin.mahasiswa.index'));
-        $mhs = Mahasiswa::where('nim', '2271020088')->first();
+        $mhs = Mahasiswa::where('nim', '2271029998')->first();
         $this->assertNotNull($mhs);
 
         // 4. Create Academic Record
