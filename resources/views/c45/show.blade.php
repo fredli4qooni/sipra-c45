@@ -46,11 +46,18 @@
                     </span>
                 @endif
                 <span class="text-xs text-slate-500 font-mono">Split: {{ $c45->split_ratio }}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                    <i data-lucide="dice-5" class="w-3 h-3 mr-1 text-slate-400"></i>
+                    Seed: {{ $c45->random_seed ?? 42 }}
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Stratified Sampling
+                </span>
             </div>
             <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ $c45->nama_model }}</h3>
             <p class="text-xs text-slate-600 max-w-2xl leading-relaxed">{{ $c45->deskripsi ?? 'Tidak ada deskripsi tambahan.' }}</p>
             <p class="text-[11px] text-slate-400 pt-1">
-                Dilatih oleh <strong>{{ $c45->creator->name ?? 'Admin' }}</strong> pada {{ $c45->train_date->format('d F Y, H:i') }} WIB • Dataset: {{ $c45->total_training_samples }} Latih / {{ $c45->total_testing_samples }} Uji
+                Dilatih oleh <strong>{{ $c45->creator->name ?? 'Admin' }}</strong> pada {{ $c45->train_date->format('d F Y, H:i') }} WIB • Dataset: {{ $c45->total_training_samples }} Latih / {{ $c45->total_testing_samples }} Uji • Seed: {{ $c45->random_seed ?? 42 }} (Deterministik & Dapat Direproduksi)
             </p>
         </div>
 

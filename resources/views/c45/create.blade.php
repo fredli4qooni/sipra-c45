@@ -69,19 +69,50 @@
                 >{{ old('deskripsi') }}</textarea>
             </div>
 
-            <!-- Data Splitting Ratio -->
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-2">Rasio Pembagian Data (Data Splitting) <span class="text-rose-500">*</span></label>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    @foreach(['80:20' => '80% Latih / 20% Uji (Standar)', '70:30' => '70% Latih / 30% Uji', '90:10' => '90% Latih / 10% Uji', '100:0' => '100% Seluruh Dataset'] as $ratio => $desc)
-                        <label class="p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-brand-50/50 hover:border-brand-200 cursor-pointer flex flex-col justify-between transition">
-                            <div class="flex items-center space-x-2">
-                                <input type="radio" name="split_ratio" value="{{ $ratio }}" {{ old('split_ratio', '80:20') == $ratio ? 'checked' : '' }} class="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300">
-                                <span class="font-bold text-xs text-slate-900">{{ $ratio }}</span>
-                            </div>
-                            <span class="text-[10px] text-slate-500 mt-1.5">{{ $desc }}</span>
+            <!-- Stratified Data Splitting Ratio & Random State Seed -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 mb-2">
+                        Rasio Pembagian Data (Data Splitting) <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        @foreach(['80:20' => '80% Latih / 20% Uji (Standar)', '70:30' => '70% Latih / 30% Uji', '90:10' => '90% Latih / 10% Uji', '100:0' => '100% Seluruh Dataset'] as $ratio => $desc)
+                            <label class="p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-brand-50/50 hover:border-brand-200 cursor-pointer flex flex-col justify-between transition">
+                                <div class="flex items-center space-x-2">
+                                    <input type="radio" name="split_ratio" value="{{ $ratio }}" {{ old('split_ratio', '80:20') == $ratio ? 'checked' : '' }} class="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300">
+                                    <span class="font-bold text-xs text-slate-900">{{ $ratio }}</span>
+                                </div>
+                                <span class="text-[10px] text-slate-500 mt-1.5">{{ $desc }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-semibold text-slate-700">
+                            Random Seed <span class="text-[10px] text-brand-600 font-normal">(Reproducibility)</span>
                         </label>
-                    @endforeach
+                        <span class="text-[10px] font-mono text-slate-400">Default: 42</span>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i data-lucide="dice-5" class="w-4 h-4"></i>
+                        </div>
+                        <input 
+                            type="number" 
+                            name="random_seed" 
+                            id="random_seed"
+                            value="{{ old('random_seed', 42) }}" 
+                            min="1" 
+                            max="999999"
+                            class="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+                        >
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                        Kunci acak deterministik berstrata (<em>Stratified Split</em>) agar pohon keputusan & evaluasi dapat direproduksi konsisten sesuai kaidah penelitian.
+                    </p>
+                    @error('random_seed') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 

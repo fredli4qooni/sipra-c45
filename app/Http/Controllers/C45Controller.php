@@ -51,11 +51,14 @@ class C45Controller extends Controller
             'nama_model' => ['required', 'string', 'max:150'],
             'deskripsi' => ['nullable', 'string'],
             'split_ratio' => ['required', 'in:80:20,70:30,90:10,100:0'],
+            'random_seed' => ['nullable', 'integer', 'min:1', 'max:999999'],
             'features' => ['required', 'array', 'min:2'],
         ], [
             'nama_model.required' => 'Nama model wajib diisi.',
             'features.required' => 'Pilih minimal 2 fitur atribut untuk pohon keputusan.',
             'features.min' => 'Pilih minimal 2 fitur atribut.',
+            'random_seed.integer' => 'Random seed harus berupa angka bulat positif.',
+            'random_seed.min' => 'Random seed minimal bernilai 1.',
         ]);
 
         $totalDataset = DataAkademik::count();
@@ -81,7 +84,7 @@ class C45Controller extends Controller
             ];
         })->toArray();
 
-        // Parse Split Ratio
+        // Parse Split Ratio & Random Seed
         $ratioMap = [
             '80:20' => 0.8,
             '70:30' => 0.7,
@@ -89,12 +92,13 @@ class C45Controller extends Controller
             '100:0' => 1.0,
         ];
         $trainRatio = $ratioMap[$validated['split_ratio']] ?? 0.8;
+        $seed = $request->filled('random_seed') ? (int) $request->input('random_seed') : 42;
 
         DB::beginTransaction();
 
         try {
             $engine = new C45EngineService();
-            $trainResult = $engine->train($records, $validated['features'], $trainRatio);
+            $trainResult = $engine->train($records, $validated['features'], $trainRatio, 'target', $seed);
 
             // Deactivate other models if this is chosen to be active or first model
             $isFirstModel = (C45Model::count() === 0);
@@ -110,6 +114,7 @@ class C45Controller extends Controller
                 'deskripsi' => $validated['deskripsi'] ?? null,
                 'train_date' => now(),
                 'split_ratio' => $validated['split_ratio'],
+                'random_seed' => $seed,
                 'total_training_samples' => $trainResult['total_training'],
                 'total_testing_samples' => $trainResult['total_testing'],
                 'target_attribute' => 'label_risiko_aktual',

@@ -37,12 +37,14 @@ class C45TrainingTest extends TestCase
             'nama_model' => 'Model C4.5 Test Otomatis',
             'deskripsi' => 'Pengujian unit training algoritma C4.5',
             'split_ratio' => '80:20',
+            'random_seed' => 777,
             'features' => ['kategori_ipk', 'kategori_kehadiran', 'kategori_sks'],
             'is_active' => 1,
         ]);
 
         $this->assertDatabaseHas('c45_models', [
             'nama_model' => 'Model C4.5 Test Otomatis',
+            'random_seed' => 777,
             'is_active' => true,
         ]);
 
@@ -55,5 +57,6 @@ class C45TrainingTest extends TestCase
         $showResponse = $this->actingAs($this->admin)->get(route('admin.c45.show', $model));
         $showResponse->assertStatus(200);
         $showResponse->assertSee('Confusion Matrix');
+        $showResponse->assertSee('Seed: 777');
     }
 }

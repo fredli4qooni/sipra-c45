@@ -52,6 +52,7 @@ class C45ModelSeeder extends Seeder
                     'deskripsi' => 'Model pohon keputusan awal berbasis dataset akademik 2021/2022.',
                     'train_date' => now(),
                     'split_ratio' => '80:20',
+                    'random_seed' => 42,
                     'total_training_samples' => $trainResult['total_training'],
                     'total_testing_samples' => $trainResult['total_testing'],
                     'target_attribute' => 'label_risiko_aktual',

@@ -107,6 +107,7 @@ class DataPreprocessingService
                 'kategori_kehadiran' => self::categorizeKehadiran($kehadiran),
                 'status_cuti' => $cuti ? 'Ya' : 'Tidak',
                 'sks_tidak_lulus' => $sksTidakLulus > 0 ? 'Ada' : 'Tidak Ada',
+                'label_risiko_aktual' => $row['label_risiko_aktual'] ?? self::determineHeuristicRisk($ipk, $kehadiran, $sksTidakLulus, $cuti),
                 'target' => $row['label_risiko_aktual'] ?? self::determineHeuristicRisk($ipk, $kehadiran, $sksTidakLulus, $cuti),
             ];
         }

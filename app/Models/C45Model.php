@@ -18,6 +18,7 @@ class C45Model extends Model
         'deskripsi',
         'train_date',
         'split_ratio',
+        'random_seed',
         'total_training_samples',
         'total_testing_samples',
         'target_attribute',
@@ -47,6 +48,7 @@ class C45Model extends Model
             'specificity' => 'decimal:2',
             'f1_score' => 'decimal:2',
             'is_active' => 'boolean',
+            'random_seed' => 'integer',
         ];
     }
 

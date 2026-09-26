@@ -444,9 +444,126 @@ class C45EngineService
     }
 
     /**
+     * Deterministic Array Shuffle using PHP 8.2+ Randomizer with Mt19937 engine
+     *
+     * Guarantees 100% reproducible ordering without polluting global RNG state.
+     *
+     * @param array $items
+     * @param int $seed
+     * @return array
+     */
+    public static function deterministicShuffle(array $items, int $seed): array
+    {
+        if (count($items) <= 1) {
+            return array_values($items);
+        }
+
+        if (class_exists(\Random\Randomizer::class) && class_exists(\Random\Engine\Mt19937::class)) {
+            $randomizer = new \Random\Randomizer(new \Random\Engine\Mt19937($seed));
+            return $randomizer->shuffleArray(array_values($items));
+        }
+
+        // Fallback Fisher-Yates with 32-bit LCG
+        $items = array_values($items);
+        $s = $seed;
+        $count = count($items);
+        for ($i = $count - 1; $i > 0; $i--) {
+            $s = (1664525 * $s + 1013904223) & 0xFFFFFFFF;
+            $j = (int) floor((($s >> 1) / 0x7FFFFFFF) * ($i + 1));
+            $temp = $items[$i];
+            $items[$i] = $items[$j];
+            $items[$j] = $temp;
+        }
+
+        return $items;
+    }
+
+    /**
+     * Stratified Train-Test Dataset Splitting with Seeded Determinism
+     *
+     * Preserves class distribution proportions across train and test sets,
+     * preventing skewed evaluation metrics or class starvation.
+     *
+     * @param array $dataset
+     * @param float $trainRatio (e.g. 0.8 for 80:20)
+     * @param string $targetAttr
+     * @param int $seed
+     * @return array{train: array, test: array}
+     */
+    public static function stratifiedSplit(array $dataset, float $trainRatio = 0.8, string $targetAttr = 'target', int $seed = 42): array
+    {
+        $total = count($dataset);
+        if ($total === 0) {
+            return ['train' => [], 'test' => []];
+        }
+
+        if ($trainRatio >= 1.0) {
+            return [
+                'train' => array_values($dataset),
+                'test' => [],
+            ];
+        }
+
+        if ($trainRatio <= 0.0) {
+            return [
+                'train' => [],
+                'test' => array_values($dataset),
+            ];
+        }
+
+        // Group dataset by target class attribute
+        $grouped = [];
+        foreach ($dataset as $row) {
+            $class = (string) ($row[$targetAttr] ?? 'Unknown');
+            $grouped[$class][] = $row;
+        }
+
+        $trainSet = [];
+        $testSet = [];
+
+        // Sort keys to maintain strict cross-platform ordering before processing
+        ksort($grouped);
+
+        foreach ($grouped as $class => $items) {
+            $classCount = count($items);
+            
+            // Deterministically shuffle samples of this class using seed mixed with class identifier
+            $classSeed = abs($seed + crc32($class));
+            $shuffledItems = self::deterministicShuffle($items, $classSeed);
+
+            // Calculate train count for this class
+            $trainCount = (int) round($classCount * $trainRatio);
+
+            // If class has at least 2 samples, ensure at least 1 sample goes to train and 1 to test
+            if ($classCount >= 2 && $trainRatio > 0.0 && $trainRatio < 1.0) {
+                if ($trainCount === 0) {
+                    $trainCount = 1;
+                } elseif ($trainCount === $classCount) {
+                    $trainCount = $classCount - 1;
+                }
+            }
+
+            $trainPart = array_slice($shuffledItems, 0, $trainCount);
+            $testPart = array_slice($shuffledItems, $trainCount);
+
+            $trainSet = array_merge($trainSet, $trainPart);
+            $testSet = array_merge($testSet, $testPart);
+        }
+
+        // Deterministically shuffle the combined train and test sets
+        $finalTrainSet = self::deterministicShuffle($trainSet, $seed);
+        $finalTestSet = self::deterministicShuffle($testSet, $seed + 1);
+
+        return [
+            'train' => $finalTrainSet,
+            'test' => $finalTestSet,
+        ];
+    }
+
+    /**
      * Train complete C4.5 Model with Data Splitting and Evaluation
      */
-    public function train(array $rawDataset, array $features = [], float $trainRatio = 0.8, string $targetAttr = 'target'): array
+    public function train(array $rawDataset, array $features = [], float $trainRatio = 0.8, string $targetAttr = 'target', int $seed = 42): array
     {
         // 1. Preprocess Dataset
         $processedData = DataPreprocessingService::preprocessDataset($rawDataset);
@@ -462,13 +579,10 @@ class C45EngineService
             ];
         }
 
-        // 2. Stratified / Random Train-Test Splitting
-        shuffle($processedData);
-        $totalSamples = count($processedData);
-        $trainCount = (int) round($totalSamples * $trainRatio);
-        
-        $trainSet = array_slice($processedData, 0, $trainCount);
-        $testSet = array_slice($processedData, $trainCount);
+        // 2. Deterministic Stratified Train-Test Splitting
+        $splitResult = self::stratifiedSplit($processedData, $trainRatio, $targetAttr, $seed);
+        $trainSet = $splitResult['train'];
+        $testSet = $splitResult['test'];
 
         // 3. Reset internal logs & state
         $this->calculationLogs = [];
@@ -484,6 +598,8 @@ class C45EngineService
         // 6. Evaluate Model on Test Set (or Train Set if test is empty)
         $evalSet = !empty($testSet) ? $testSet : $trainSet;
         $evaluation = $this->evaluateModel($treeStructure, $evalSet, $targetAttr);
+        $evaluation['random_seed'] = $seed;
+        $evaluation['split_strategy'] = 'Stratified (Seeded)';
 
         return [
             'tree' => $treeStructure,
@@ -493,6 +609,8 @@ class C45EngineService
             'total_training' => count($trainSet),
             'total_testing' => count($testSet),
             'features_used' => $features,
+            'random_seed' => $seed,
+            'split_strategy' => 'Stratified (Seeded)',
         ];
     }
 
