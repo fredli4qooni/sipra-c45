@@ -158,9 +158,8 @@
             </table>
         </div>
 
-        <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500">
-            <span>Menampilkan {{ $akademiks->firstItem() ?? 0 }} - {{ $akademiks->lastItem() ?? 0 }} dari {{ $akademiks->total() }} baris data</span>
-            <div>{{ $akademiks->links() }}</div>
+        <div class="pt-4 border-t border-slate-100">
+            {{ $akademiks->links() }}
         </div>
     </div>
 

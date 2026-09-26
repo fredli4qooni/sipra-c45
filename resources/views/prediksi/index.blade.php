@@ -189,9 +189,8 @@
             </table>
         </div>
 
-        <div class="pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-            <span>Menampilkan {{ $prediksis->firstItem() ?? 0 }} - {{ $prediksis->lastItem() ?? 0 }} dari {{ $prediksis->total() }} data</span>
-            <div>{{ $prediksis->links() }}</div>
+        <div class="pt-4 border-t border-slate-100">
+            {{ $prediksis->links() }}
         </div>
     </div>
 

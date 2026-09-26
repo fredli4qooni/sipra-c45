@@ -131,9 +131,8 @@
             </table>
         </div>
 
-        <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500">
-            <span>Menampilkan {{ $mahasiswas->firstItem() ?? 0 }} - {{ $mahasiswas->lastItem() ?? 0 }} dari {{ $mahasiswas->total() }} mahasiswa</span>
-            <div>{{ $mahasiswas->links() }}</div>
+        <div class="pt-4 border-t border-slate-100">
+            {{ $mahasiswas->links() }}
         </div>
     </div>
 

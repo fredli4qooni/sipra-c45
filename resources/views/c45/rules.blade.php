@@ -109,9 +109,8 @@
             </table>
         </div>
 
-        <div class="pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-            <span>Menampilkan {{ $rules->firstItem() ?? 0 }} - {{ $rules->lastItem() ?? 0 }} dari {{ $rules->total() }} aturan</span>
-            <div>{{ $rules->links() }}</div>
+        <div class="pt-4 border-t border-slate-100">
+            {{ $rules->links() }}
         </div>
     </div>
 
