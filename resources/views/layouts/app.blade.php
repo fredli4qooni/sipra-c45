@@ -189,6 +189,11 @@
                             <span>Data Mahasiswa</span>
                         </a>
 
+                        <a href="{{ route('admin.dosen.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('admin.dosen.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                            <i data-lucide="user-check" class="w-4 h-4 {{ request()->routeIs('admin.dosen.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
+                            <span>Data Dosen PA</span>
+                        </a>
+
                         <a href="{{ route('admin.akademik.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('admin.akademik.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                             <i data-lucide="graduation-cap" class="w-4 h-4 {{ request()->routeIs('admin.akademik.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Nilai & Akademik</span>

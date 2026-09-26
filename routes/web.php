@@ -35,6 +35,9 @@ Route::middleware(['auth'])->group(function () {
         // Master Data Mahasiswa
         Route::resource('mahasiswa', \App\Http\Controllers\MahasiswaController::class);
 
+        // Master Data Dosen Pembimbing Akademik (Dosen PA)
+        Route::resource('dosen', \App\Http\Controllers\DosenPaController::class);
+
         // Master Data Akademik & Excel Import/Export
         Route::get('akademik/template', [\App\Http\Controllers\DataAkademikController::class, 'downloadTemplate'])->name('akademik.template');
         Route::post('akademik/import', [\App\Http\Controllers\DataAkademikController::class, 'import'])->name('akademik.import');
