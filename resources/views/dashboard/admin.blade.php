@@ -123,7 +123,10 @@
             <!-- Risiko Rendah -->
             <div class="p-4 rounded-lg bg-brand-50/60 border border-brand-200/80 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-brand-800">🟢 Risiko Rendah</span>
+                    <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-brand-800">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-brand-600"></i>
+                        <span>Risiko Rendah</span>
+                    </span>
                     <h5 class="text-2xl font-extrabold text-slate-900 mt-1">{{ $totalRisikoRendah }}</h5>
                     <p class="text-[11px] text-brand-700">Performa Baik / Aman</p>
                 </div>
@@ -135,7 +138,10 @@
             <!-- Risiko Sedang -->
             <div class="p-4 rounded-lg bg-amber-50/60 border border-amber-200/80 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-amber-800">🟡 Risiko Sedang</span>
+                    <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-800">
+                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-600"></i>
+                        <span>Risiko Sedang</span>
+                    </span>
                     <h5 class="text-2xl font-extrabold text-slate-900 mt-1">{{ $totalRisikoSedang }}</h5>
                     <p class="text-[11px] text-amber-700">Perlu Pemantauan PA</p>
                 </div>
@@ -147,7 +153,10 @@
             <!-- Risiko Tinggi -->
             <div class="p-4 rounded-lg bg-rose-50/60 border border-rose-200/80 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold text-rose-800">🔴 Risiko Tinggi</span>
+                    <span class="inline-flex items-center space-x-1.5 text-xs font-bold text-rose-800">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-rose-600"></i>
+                        <span>Risiko Tinggi</span>
+                    </span>
                     <h5 class="text-2xl font-extrabold text-slate-900 mt-1">{{ $totalRisikoTinggi }}</h5>
                     <p class="text-[11px] text-rose-700">Potensi Hambatan / DO</p>
                 </div>
@@ -183,8 +192,9 @@
                 <i data-lucide="user-check" class="w-4 h-4 text-brand-600"></i>
                 <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Mahasiswa Terdaftar Terbaru</h4>
             </div>
-            <a href="{{ route('admin.mahasiswa.index') }}" class="text-xs font-bold text-brand-700 hover:text-brand-800 hover:underline">
-                Lihat Semua ➜
+            <a href="{{ route('admin.mahasiswa.index') }}" class="text-xs font-bold text-brand-700 hover:text-brand-800 hover:underline inline-flex items-center">
+                <span>Lihat Semua</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
             </a>
         </div>
 

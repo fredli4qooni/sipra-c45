@@ -162,7 +162,7 @@
                                 };
 
                                 echo '<div class="inline-flex items-center space-x-2.5 p-3 rounded-lg border shadow-xs ' . $colorClass . ' my-1 bg-white">';
-                                echo '  <div class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs ' . $badgeColor . '">✓</div>';
+                                echo '  <div class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs ' . $badgeColor . '"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>';
                                 echo '  <div>';
                                 echo '    <p class="text-xs font-bold uppercase tracking-wider">' . e($decision) . '</p>';
                                 echo '    <p class="text-[10px] text-slate-500">Confidence: ' . $node['confidence'] . '% (' . $node['samples_count'] . ' sampel)</p>';
@@ -183,8 +183,8 @@
                             foreach ($node['branches'] as $val => $child) {
                                 echo '    <div class="relative">';
                                 echo '      <div class="flex items-center space-x-2 mb-1.5">';
-                                echo '        <span class="text-xs font-bold text-brand-600">➜</span>';
-                                echo '        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white text-slate-800 border border-slate-200 shadow-xs">' . e($val) . '</span>';
+                                echo '        <i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-brand-600 inline"></i>';
+                                echo '        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-white text-slate-800 border border-slate-200 shadow-xs">' . e($val) . '</span>';
                                 echo '      </div>';
                                 echo '      <div class="pl-4">';
                                 renderTreeNode($child, $depth + 1);
@@ -335,7 +335,7 @@
                     }
 
                     return `
-                        <div style="width: 100%; height: 100%; background: ${bg}; border: 2px solid ${border}; border-radius: 16px; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Plus Jakarta Sans', sans-serif;">
+                        <div style="width: 100%; height: 100%; background: ${bg}; border: 2px solid ${border}; border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Plus Jakarta Sans', sans-serif;">
                             <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
                                 <span style="width: 8px; height: 8px; border-radius: 9999px; background: ${dot}; display: inline-block;"></span>
                                 <span style="font-size: 13px; font-weight: 800; color: ${text}; text-transform: uppercase;">${data.decision}</span>
@@ -354,14 +354,14 @@
                 const bg = isRoot ? '#fef3c7' : '#f8fafc';
                 const border = isRoot ? '#d97706' : '#64748b';
                 const titleColor = isRoot ? '#78350f' : '#0f172a';
-                const titlePrefix = isRoot ? '👑 ' : '🔍 ';
+                const rootBadge = isRoot ? '<span style="font-size: 9px; font-weight: 800; letter-spacing: 0.05em; background: #fef08a; color: #854d0e; padding: 1px 5px; border-radius: 4px; margin-right: 4px; border: 1px solid #fde047;">ROOT</span>' : '';
                 const rawAttr = data.attribute || 'Atribut';
                 const formattedAttr = rawAttr.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
                 return `
-                    <div style="width: 100%; height: 100%; background: ${bg}; border: 2px solid ${border}; border-radius: 16px; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Plus Jakarta Sans', sans-serif;">
+                    <div style="width: 100%; height: 100%; background: ${bg}; border: 2px solid ${border}; border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-family: 'Plus Jakarta Sans', sans-serif;">
                         <div style="font-size: 12px; font-weight: 800; color: ${titleColor}; text-align: center; line-height: 1.2;">
-                            ${titlePrefix}${formattedAttr}?
+                            ${rootBadge}${formattedAttr}?
                         </div>
                         <div style="font-size: 11px; font-weight: 700; color: #059669; background: #ffffff; padding: 1px 8px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 4px;">
                             Gain: ${data.gain_ratio}

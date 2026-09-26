@@ -273,8 +273,9 @@
                                         <td class="py-2 {{ $isBest ? 'text-brand-700 font-bold' : 'text-slate-700' }}">{{ $calc['gain_ratio'] ?? 0 }}</td>
                                         <td class="py-2 text-right">
                                             @if($isBest)
-                                                <span class="px-2 py-0.5 rounded-full text-[9px] bg-brand-100 text-brand-800 font-bold border border-brand-200">
-                                                    ★ Terpilih (Gain Ratio Tertinggi)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] bg-brand-100 text-brand-800 font-bold border border-brand-200">
+                                                    <i data-lucide="check" class="w-3 h-3 text-brand-700 flex-shrink-0"></i>
+                                                    <span>Terpilih (Gain Ratio Tertinggi)</span>
                                                 </span>
                                             @else
                                                 <span class="text-slate-400 text-[10px]">-</span>

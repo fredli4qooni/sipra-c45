@@ -17,8 +17,9 @@
                 <p class="text-[10px] text-brand-800">Akurasi Pengujian: <strong>{{ $activeModel->accuracy ?? 0 }}%</strong> • {{ count($activeModel->rules ?? []) }} Aturan Klasifikasi</p>
             </div>
         </div>
-        <a href="{{ auth()->user()->isAdmin() ? route('admin.c45.index') : route('prodi.c45.index') }}" class="text-xs font-bold text-brand-700 hover:underline">
-            Ganti Model ➜
+        <a href="{{ auth()->user()->isAdmin() ? route('admin.c45.index') : route('prodi.c45.index') }}" class="text-xs font-bold text-brand-700 hover:underline inline-flex items-center">
+            <span>Ganti Model</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
         </a>
     </div>
 

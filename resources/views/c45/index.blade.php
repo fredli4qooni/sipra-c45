@@ -7,15 +7,15 @@
 <div class="space-y-6">
 
     <!-- Active Model Ribbon Banner -->
-    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-brand-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+    <div class="bg-white p-6 sm:p-8 rounded-xl border border-brand-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         <div class="space-y-2">
             <div class="flex items-center space-x-2">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-brand-500 mr-1.5 animate-ping"></span>
                     Model Klasifikasi Aktif Sistem
                 </span>
             </div>
-            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-display">
                 {{ $activeModel->nama_model ?? 'Belum ada model yang diaktifkan' }}
             </h3>
             <p class="text-xs text-slate-500">
@@ -29,15 +29,15 @@
 
         <div class="flex flex-wrap items-center gap-3">
             @if($activeModel)
-                <div class="p-3.5 rounded-2xl bg-brand-50/70 border border-brand-200/80 text-center min-w-[130px]">
+                <div class="p-3.5 rounded-lg bg-brand-50/70 border border-brand-200/80 text-center min-w-[130px]">
                     <p class="text-[10px] text-brand-700 uppercase font-bold tracking-wider">Akurasi Pengujian</p>
-                    <p class="text-2xl font-black text-brand-800">{{ $activeModel->accuracy }}%</p>
+                    <p class="text-2xl font-black text-brand-800 font-display">{{ $activeModel->accuracy }}%</p>
                     <span class="text-[10px] text-brand-600 font-medium">F1-Score: {{ $activeModel->f1_score }}%</span>
                 </div>
             @endif
 
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('admin.c45.create') }}" class="inline-flex items-center px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-xs hover:shadow-sm transition">
+                <a href="{{ route('admin.c45.create') }}" class="inline-flex items-center px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-xs hover:shadow-sm transition">
                     <i data-lucide="play" class="w-4 h-4 mr-1.5"></i>
                     Latih Model C4.5 Baru
                 </a>
@@ -46,7 +46,7 @@
     </div>
 
     <!-- Models Table List Card -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2.5">
                 <i data-lucide="history" class="w-4 h-4 text-brand-600"></i>
@@ -87,12 +87,12 @@
                             <td class="py-3.5 text-slate-700">{{ $model->f1_score }}%</td>
                             <td class="py-3.5">
                                 @if($model->is_active)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200">
                                         <span class="w-1.5 h-1.5 rounded-full bg-brand-500 mr-1.5"></span>
                                         Aktif
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600">
                                         Arsip
                                     </span>
                                 @endif
@@ -101,8 +101,9 @@
                                 @php
                                     $showRoute = auth()->user()->isAdmin() ? route('admin.c45.show', $model) : route('prodi.c45.show', $model);
                                 @endphp
-                                <a href="{{ $showRoute }}" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition inline-flex items-center">
-                                    Inspeksi ➜
+                                <a href="{{ $showRoute }}" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition inline-flex items-center gap-1">
+                                    <span>Inspeksi</span>
+                                    <i data-lucide="arrow-right" class="w-3 h-3 text-slate-500"></i>
                                 </a>
 
                                 @if(auth()->user()->isAdmin() && !$model->is_active)

@@ -16,7 +16,7 @@
         @php
             $exportBatchRoute = auth()->user()->isAdmin() ? route('admin.prediksi.batch.export', $batch) : route('prodi.prediksi.batch.export', $batch);
         @endphp
-        <a href="{{ $exportBatchRoute }}" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs font-bold text-white shadow-xs transition flex items-center">
+        <a href="{{ $exportBatchRoute }}" class="px-4 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-bold text-white shadow-xs transition flex items-center">
             <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i>
             Ekspor Hasil Prediksi ke Excel (.xlsx)
         </a>
@@ -28,7 +28,7 @@
         <!-- Batch Metadata & Distribution Cards -->
         <div class="lg:col-span-2 space-y-4">
             
-            <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-3">
+            <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-mono text-xs font-bold">
                         {{ $batch->batch_code }}
@@ -42,24 +42,33 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="p-4 rounded-2xl bg-brand-50/60 border border-brand-200/80 text-center space-y-1">
-                    <span class="text-xs font-bold text-brand-800">🟢 Risiko Rendah</span>
+                <div class="p-4 rounded-lg bg-brand-50/60 border border-brand-200/80 text-center space-y-1">
+                    <div class="flex items-center justify-center space-x-1 text-xs font-bold text-brand-800">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-brand-600"></i>
+                        <span>Risiko Rendah</span>
+                    </div>
                     <h4 class="text-2xl font-black text-slate-900">{{ $batch->total_rendah }}</h4>
                     <p class="text-[10px] text-brand-700 font-medium">
                         {{ $batch->total_records > 0 ? round(($batch->total_rendah / $batch->total_records) * 100) : 0 }}% Mahasiswa
                     </p>
                 </div>
 
-                <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 text-center space-y-1">
-                    <span class="text-xs font-bold text-amber-800">🟡 Risiko Sedang</span>
+                <div class="p-4 rounded-lg bg-amber-50/60 border border-amber-200/80 text-center space-y-1">
+                    <div class="flex items-center justify-center space-x-1 text-xs font-bold text-amber-800">
+                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-600"></i>
+                        <span>Risiko Sedang</span>
+                    </div>
                     <h4 class="text-2xl font-black text-slate-900">{{ $batch->total_sedang }}</h4>
                     <p class="text-[10px] text-amber-700 font-medium">
                         {{ $batch->total_records > 0 ? round(($batch->total_sedang / $batch->total_records) * 100) : 0 }}% Mahasiswa
                     </p>
                 </div>
 
-                <div class="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 text-center space-y-1">
-                    <span class="text-xs font-bold text-rose-800">🔴 Risiko Tinggi</span>
+                <div class="p-4 rounded-lg bg-rose-50/60 border border-rose-200/80 text-center space-y-1">
+                    <div class="flex items-center justify-center space-x-1 text-xs font-bold text-rose-800">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-rose-600"></i>
+                        <span>Risiko Tinggi</span>
+                    </div>
                     <h4 class="text-2xl font-black text-slate-900">{{ $batch->total_tinggi }}</h4>
                     <p class="text-[10px] text-rose-700 font-medium">
                         {{ $batch->total_records > 0 ? round(($batch->total_tinggi / $batch->total_records) * 100) : 0 }}% Mahasiswa
@@ -69,7 +78,7 @@
         </div>
 
         <!-- Doughnut Chart Canvas Card -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col items-center justify-center space-y-4">
+        <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs flex flex-col items-center justify-center space-y-4">
             <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Distribusi Proporsi Risiko</h4>
             <div class="w-44 h-44 relative">
                 <canvas id="riskDoughnutChart"></canvas>
@@ -80,7 +89,7 @@
     </div>
 
     <!-- Student List Table -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2.5">
                 <i data-lucide="users" class="w-4 h-4 text-brand-600"></i>
@@ -114,7 +123,7 @@
                             <td class="py-3.5 font-bold text-slate-900">{{ $input['ipk'] ?? '-' }}</td>
                             <td class="py-3.5 text-slate-600">{{ $input['persentase_kehadiran'] ?? '-' }}%</td>
                             <td class="py-3.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold
                                     @if($item->hasil_klasifikasi === 'Risiko Rendah') bg-brand-50 text-brand-700 border border-brand-200/60
                                     @elseif($item->hasil_klasifikasi === 'Risiko Sedang') bg-amber-50 text-amber-700 border border-amber-200/60
                                     @else bg-rose-50 text-rose-700 border border-rose-200/60

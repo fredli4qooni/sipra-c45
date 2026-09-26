@@ -7,7 +7,7 @@
 <div class="space-y-6">
 
     <!-- Top Action & Filter Card -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h3 class="text-base font-bold text-slate-900">Rules Explorer (IF - THEN)</h3>
@@ -17,7 +17,7 @@
             </div>
 
             <div class="flex items-center space-x-2">
-                <a href="{{ auth()->user()->isAdmin() ? route('admin.tree.show', ['c45' => $c45?->id]) : route('prodi.tree.show', ['c45' => $c45?->id]) }}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center">
+                <a href="{{ auth()->user()->isAdmin() ? route('admin.tree.show', ['c45' => $c45?->id]) : route('prodi.tree.show', ['c45' => $c45?->id]) }}" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center">
                     <i data-lucide="git-merge" class="w-4 h-4 mr-1.5 text-brand-600"></i>
                     Buka Pohon Keputusan
                 </a>
@@ -40,20 +40,20 @@
                     name="search" 
                     value="{{ request('search') }}" 
                     placeholder="Cari kondisi aturan (contoh: IPK = Rendah)..." 
-                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
                 >
             </div>
 
             <!-- Filter Keputusan -->
             <div class="flex items-center space-x-2">
-                <select name="decision" onchange="this.form.submit()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                <select name="decision" onchange="this.form.submit()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                     <option value="">Semua Keputusan</option>
-                    <option value="Risiko Rendah" {{ request('decision') === 'Risiko Rendah' ? 'selected' : '' }}>🟢 Risiko Rendah</option>
-                    <option value="Risiko Sedang" {{ request('decision') === 'Risiko Sedang' ? 'selected' : '' }}>🟡 Risiko Sedang</option>
-                    <option value="Risiko Tinggi" {{ request('decision') === 'Risiko Tinggi' ? 'selected' : '' }}>🔴 Risiko Tinggi</option>
+                    <option value="Risiko Rendah" {{ request('decision') === 'Risiko Rendah' ? 'selected' : '' }}>Risiko Rendah</option>
+                    <option value="Risiko Sedang" {{ request('decision') === 'Risiko Sedang' ? 'selected' : '' }}>Risiko Sedang</option>
+                    <option value="Risiko Tinggi" {{ request('decision') === 'Risiko Tinggi' ? 'selected' : '' }}>Risiko Tinggi</option>
                 </select>
                 @if(request()->hasAny(['search', 'decision']))
-                    <a href="{{ auth()->user()->isAdmin() ? route('admin.rules.index', ['c45' => $c45?->id]) : route('prodi.rules.index', ['c45' => $c45?->id]) }}" class="p-2 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-900 transition">
+                    <a href="{{ auth()->user()->isAdmin() ? route('admin.rules.index', ['c45' => $c45?->id]) : route('prodi.rules.index', ['c45' => $c45?->id]) }}" class="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition">
                         <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     </a>
                 @endif
@@ -62,7 +62,7 @@
     </div>
 
     <!-- Rules Table Card -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead>
@@ -89,7 +89,7 @@
                                 {!! $formatted !!}
                             </td>
                             <td class="py-3.5 font-sans">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold
                                     @if($rule->decision === 'Risiko Rendah') bg-brand-50 text-brand-700 border border-brand-200/60
                                     @elseif($rule->decision === 'Risiko Sedang') bg-amber-50 text-amber-700 border border-amber-200/60
                                     @else bg-rose-50 text-rose-700 border border-rose-200/60

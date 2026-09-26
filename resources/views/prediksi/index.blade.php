@@ -44,19 +44,28 @@
         </div>
 
         <div class="p-4 rounded-lg bg-brand-50/60 border border-brand-200/80 text-center space-y-1">
-            <p class="text-[11px] font-bold text-brand-800 uppercase">🟢 Risiko Rendah</p>
+            <div class="flex items-center justify-center space-x-1 text-[11px] font-bold text-brand-800 uppercase">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-brand-600"></i>
+                <span>Risiko Rendah</span>
+            </div>
             <h4 class="text-2xl font-black text-slate-900">{{ number_format($totalRendah) }}</h4>
             <p class="text-[10px] text-brand-700 font-medium">Studi Berjalan Lancar</p>
         </div>
 
         <div class="p-4 rounded-lg bg-amber-50/60 border border-amber-200/80 text-center space-y-1">
-            <p class="text-[11px] font-bold text-amber-800 uppercase">🟡 Risiko Sedang</p>
+            <div class="flex items-center justify-center space-x-1 text-[11px] font-bold text-amber-800 uppercase">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-600"></i>
+                <span>Risiko Sedang</span>
+            </div>
             <h4 class="text-2xl font-black text-slate-900">{{ number_format($totalSedang) }}</h4>
             <p class="text-[10px] text-amber-700 font-medium">Perlu Pemantauan PA</p>
         </div>
 
         <div class="p-4 rounded-lg bg-rose-50/60 border border-rose-200/80 text-center space-y-1">
-            <p class="text-[11px] font-bold text-rose-800 uppercase">🔴 Risiko Tinggi</p>
+            <div class="flex items-center justify-center space-x-1 text-[11px] font-bold text-rose-800 uppercase">
+                <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-rose-600"></i>
+                <span>Risiko Tinggi</span>
+            </div>
             <h4 class="text-2xl font-black text-slate-900">{{ number_format($totalTinggi) }}</h4>
             <p class="text-[10px] text-rose-700 font-medium">Peringatan Dini / Potensi DO</p>
         </div>
@@ -82,8 +91,9 @@
                         <p class="text-xs text-slate-900 font-semibold truncate">{{ $batch->file_name ?? 'Batch Upload' }}</p>
                         <div class="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px]">
                             <span class="text-slate-500">Total: <strong class="text-slate-900">{{ $batch->total_records }}</strong> data</span>
-                            <a href="{{ auth()->user()->isAdmin() ? route('admin.prediksi.batch.show', $batch) : route('prodi.prediksi.batch.show', $batch) }}" class="text-brand-700 hover:underline font-bold flex items-center">
-                                Hasil Detail ➜
+                            <a href="{{ auth()->user()->isAdmin() ? route('admin.prediksi.batch.show', $batch) : route('prodi.prediksi.batch.show', $batch) }}" class="text-brand-700 hover:underline font-bold inline-flex items-center">
+                                <span>Hasil Detail</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
                             </a>
                         </div>
                     </div>
@@ -111,9 +121,9 @@
                 >
                 <select name="hasil_klasifikasi" onchange="this.form.submit()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                     <option value="">Semua Risiko</option>
-                    <option value="Risiko Rendah" {{ request('hasil_klasifikasi') === 'Risiko Rendah' ? 'selected' : '' }}>🟢 Risiko Rendah</option>
-                    <option value="Risiko Sedang" {{ request('hasil_klasifikasi') === 'Risiko Sedang' ? 'selected' : '' }}>🟡 Risiko Sedang</option>
-                    <option value="Risiko Tinggi" {{ request('hasil_klasifikasi') === 'Risiko Tinggi' ? 'selected' : '' }}>🔴 Risiko Tinggi</option>
+                    <option value="Risiko Rendah" {{ request('hasil_klasifikasi') === 'Risiko Rendah' ? 'selected' : '' }}>Risiko Rendah</option>
+                    <option value="Risiko Sedang" {{ request('hasil_klasifikasi') === 'Risiko Sedang' ? 'selected' : '' }}>Risiko Sedang</option>
+                    <option value="Risiko Tinggi" {{ request('hasil_klasifikasi') === 'Risiko Tinggi' ? 'selected' : '' }}>Risiko Tinggi</option>
                 </select>
                 @if(request()->hasAny(['search', 'hasil_klasifikasi']))
                     <a href="{{ auth()->user()->isAdmin() ? route('admin.prediksi.index') : route('prodi.prediksi.index') }}" class="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition">
@@ -165,7 +175,8 @@
                             <td class="py-3.5 text-right">
                                 @php $showPredRoute = auth()->user()->isAdmin() ? route('admin.prediksi.show', $p) : route('prodi.prediksi.show', $p); @endphp
                                 <a href="{{ $showPredRoute }}" class="px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-[11px] border border-brand-200/60 transition inline-flex items-center">
-                                    Surat Rekomendasi ➜
+                                    <span>Surat Rekomendasi</span>
+                                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
                                 </a>
                             </td>
                         </tr>

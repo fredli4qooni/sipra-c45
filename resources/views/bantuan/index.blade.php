@@ -213,22 +213,31 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <!-- Risiko Rendah -->
-            <div class="p-4 rounded-2xl bg-brand-50/60 border border-brand-200/80 space-y-2">
-                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-600 text-white">🟢 Risiko Rendah (Aman)</span>
+            <div class="p-4 rounded-lg bg-brand-50/60 border border-brand-200/80 space-y-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-brand-600 text-white">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                    <span>Risiko Rendah (Aman)</span>
+                </span>
                 <p class="text-slate-700">Mahasiswa berada di jalur yang tepat untuk lulus tepat waktu pada semester 8.</p>
                 <p class="text-[11px] text-brand-800 font-semibold">• Tindakan: Rekomendasikan mulai merancang topik proposal skripsi dan magang MBKM.</p>
             </div>
 
             <!-- Risiko Sedang -->
-            <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2">
-                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-white">🟡 Risiko Sedang (Waspada)</span>
+            <div class="p-4 rounded-lg bg-amber-50/60 border border-amber-200/80 space-y-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-500 text-white">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                    <span>Risiko Sedang (Waspada)</span>
+                </span>
                 <p class="text-slate-700">Terdapat beberapa indikator yang berpotensi menghambat kelancaran studi (misal: kehadiran pas-pasan atau SKS mengulang).</p>
                 <p class="text-[11px] text-amber-800 font-semibold">• Tindakan: Jadwalkan sesi konsultasi dengan Dosen Pembimbing Akademik.</p>
             </div>
 
             <!-- Risiko Tinggi -->
-            <div class="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 space-y-2">
-                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-600 text-white">🔴 Risiko Tinggi (Kritis)</span>
+            <div class="p-4 rounded-lg bg-rose-50/60 border border-rose-200/80 space-y-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-rose-600 text-white">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                    <span>Risiko Tinggi (Kritis)</span>
+                </span>
                 <p class="text-slate-700">Mahasiswa memiliki probabilitas tinggi mengalami keterlambatan studi signifikan atau sanksi Drop Out (DO).</p>
                 <p class="text-[11px] text-rose-800 font-semibold">• Tindakan: Intervensi khusus oleh Kaprodi & Dosen PA untuk restrukturisasi KRS dan perbaikan nilai.</p>
             </div>
