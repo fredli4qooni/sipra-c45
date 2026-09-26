@@ -79,10 +79,11 @@
                         <th class="pb-2.5 font-semibold">Kehadiran</th>
                         <th class="pb-2.5 font-semibold">Status Cuti</th>
                         <th class="pb-2.5 font-semibold">Klasifikasi Risiko</th>
+                        <th class="pb-2.5 font-semibold">Intervensi PA</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @forelse($mahasiswa->dataAkademiks()->orderBy('semester', 'asc')->get() as $akd)
+                    @forelse($mahasiswa->dataAkademiks()->with('dosenPa')->orderBy('semester', 'asc')->get() as $akd)
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3 font-bold text-slate-900">Semester {{ $akd->semester }}</td>
                             <td class="py-3 text-slate-600">{{ $akd->tahun_akademik }}</td>
@@ -105,10 +106,22 @@
                                     {{ $akd->label_risiko_aktual }}
                                 </span>
                             </td>
+                            <td class="py-3">
+                                @if($akd->status_intervensi && $akd->status_intervensi !== 'Belum Ditindaklanjuti')
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold
+                                        @if($akd->status_intervensi === 'Selesai / Teratasi') bg-brand-50 text-brand-700 border border-brand-200
+                                        @elseif($akd->status_intervensi === 'Sedang Bimbingan') bg-blue-50 text-blue-700 border border-blue-200
+                                        @else bg-amber-50 text-amber-700 border border-amber-200 @endif">
+                                        {{ $akd->status_intervensi }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 text-[10px]">-</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="py-8 text-center text-slate-400">Belum ada riwayat data akademik untuk mahasiswa ini.</td>
+                            <td colspan="10" class="py-8 text-center text-slate-400">Belum ada riwayat data akademik untuk mahasiswa ini.</td>
                         </tr>
                     @endforelse
                 </tbody>

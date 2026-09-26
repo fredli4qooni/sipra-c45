@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Early Warning System (EWS)
         Route::get('ews', [\App\Http\Controllers\EwsController::class, 'index'])->name('ews.index');
+        Route::put('ews/{dataAkademik}/intervensi', [\App\Http\Controllers\EwsController::class, 'updateIntervention'])->name('ews.intervensi.update');
 
         // Modul Laporan & Rekapitulasi
         Route::get('laporan', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
@@ -92,6 +93,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Early Warning System (EWS)
         Route::get('ews', [\App\Http\Controllers\EwsController::class, 'index'])->name('ews.index');
+        Route::put('ews/{dataAkademik}/intervensi', [\App\Http\Controllers\EwsController::class, 'updateIntervention'])->name('ews.intervensi.update');
 
         // Modul Laporan & Rekapitulasi
         Route::get('laporan', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');

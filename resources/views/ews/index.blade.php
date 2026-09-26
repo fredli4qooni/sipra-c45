@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Early Warning System (EWS) Alert Center')
-@section('subtitle', 'Pusat deteksi dini & pemantauan mahasiswa berpotensi mengalami hambatan akademik / DO')
+@section('subtitle', 'Pusat deteksi dini & pencatatan bimbingan intervensi akademik Dosen PA')
 
 @section('content')
 <div class="space-y-6">
@@ -17,7 +17,7 @@
             </div>
             <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Peringatan Dini Akademik Mahasiswa</h3>
             <p class="text-xs text-slate-500 max-w-2xl leading-relaxed">
-                Daftar mahasiswa yang memerlukan perhatian segera berdasarkan indikator kritis C4.5: penurunan IPK di bawah standar (&lt;2.75), kehadiran rendah (&lt;75%), status cuti, atau penumpukan SKS tidak lulus.
+                Pemantauan mahasiswa yang terindikasi mengalami kendala studi berdasarkan Decision Tree C4.5: penurunan IPK (&lt;2.75), kehadiran rendah (&lt;75%), status cuti, atau penumpukan SKS tidak lulus, lengkap dengan modul tindak lanjut bimbingan Dosen PA.
             </p>
         </div>
 
@@ -30,55 +30,75 @@
         </div>
     </div>
 
-    <!-- Metric Breakdown Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <!-- 5 Metric Breakdown Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
         <div class="bg-white p-4 rounded-lg border border-rose-200/80 shadow-xs text-center space-y-1">
             <p class="text-[11px] font-bold text-rose-700 uppercase">Risiko Tinggi Aktual</p>
             <h4 class="text-2xl font-black text-slate-900">{{ $criticalCount }}</h4>
-            <p class="text-[10px] text-slate-400">Kategori Prioritas 1</p>
+            <p class="text-[10px] text-slate-400">Prioritas Tingkat 1</p>
         </div>
 
         <div class="bg-white p-4 rounded-lg border border-amber-200/80 shadow-xs text-center space-y-1">
-            <p class="text-[11px] font-bold text-amber-700 uppercase">Kehadiran &lt; 75%</p>
+            <p class="text-[11px] font-bold text-amber-700 uppercase">IPK &lt; 2.75</p>
+            <h4 class="text-2xl font-black text-slate-900">{{ $gpaRiskCount }}</h4>
+            <p class="text-[10px] text-slate-400">Kategori Rendah</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg border border-yellow-200/80 shadow-xs text-center space-y-1">
+            <p class="text-[11px] font-bold text-yellow-700 uppercase">Kehadiran &lt; 75%</p>
             <h4 class="text-2xl font-black text-slate-900">{{ $attendanceRiskCount }}</h4>
             <p class="text-[10px] text-slate-400">Batas Minimal Ujian</p>
         </div>
 
-        <div class="bg-white p-4 rounded-lg border border-yellow-200/80 shadow-xs text-center space-y-1">
-            <p class="text-[11px] font-bold text-yellow-700 uppercase">IPK &lt; 2.75</p>
-            <h4 class="text-2xl font-black text-slate-900">{{ $gpaRiskCount }}</h4>
-            <p class="text-[10px] text-slate-400">Kategori IPK Rendah</p>
+        <div class="bg-white p-4 rounded-lg border border-rose-200 shadow-xs text-center space-y-1 bg-rose-50/30">
+            <p class="text-[11px] font-bold text-rose-700 uppercase">Belum Ditindaklanjuti</p>
+            <h4 class="text-2xl font-black text-rose-800">{{ $pendingInterventionCount }}</h4>
+            <p class="text-[10px] text-rose-600 font-medium">Menunggu Tindakan PA</p>
         </div>
 
-        <div class="bg-white p-4 rounded-lg border border-blue-200/80 shadow-xs text-center space-y-1">
-            <p class="text-[11px] font-bold text-blue-700 uppercase">Status Cuti Studi</p>
-            <h4 class="text-2xl font-black text-slate-900">{{ $cutiCount }}</h4>
-            <p class="text-[10px] text-slate-400">Dalam Masa Penundaan</p>
+        <div class="bg-white p-4 rounded-lg border border-brand-200 shadow-xs text-center space-y-1 bg-brand-50/30">
+            <p class="text-[11px] font-bold text-brand-700 uppercase">Bimbingan Selesai</p>
+            <h4 class="text-2xl font-black text-brand-800">{{ $completedInterventionCount }}</h4>
+            <p class="text-[10px] text-brand-600 font-medium">Intervensi Teratasi</p>
         </div>
     </div>
 
     <!-- Alert List Table Card -->
     <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-100">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2.5">
                 <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Daftar Mahasiswa Terindikasi Masalah Akademik</h4>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Daftar Mahasiswa Terindikasi Masalah Akademik</h4>
+                    <p class="text-[11px] text-slate-500">Klik "Bimbingan PA" untuk memperbarui status tindak lanjut dan mencatat hasil konsultasi</p>
+                </div>
             </div>
 
-            <!-- Filter Semester -->
+            <!-- Filter Toolbar -->
             @php
                 $ewsIndexRoute = auth()->user()->isAdmin() ? route('admin.ews.index') : route('prodi.ews.index');
             @endphp
-            <form method="GET" action="{{ $ewsIndexRoute }}" class="flex items-center space-x-2">
-                <select name="semester" onchange="this.form.submit()" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
+            <form method="GET" action="{{ $ewsIndexRoute }}" class="flex flex-wrap items-center gap-2">
+                <!-- Semester Filter -->
+                <select name="semester" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
                     <option value="">Semua Semester</option>
                     @for($s = 1; $s <= 8; $s++)
                         <option value="{{ $s }}" {{ request('semester') == $s ? 'selected' : '' }}>Semester {{ $s }}</option>
                     @endfor
                 </select>
-                @if(request()->has('semester'))
-                    <a href="{{ $ewsIndexRoute }}" class="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+
+                <!-- Status Intervensi Filter -->
+                <select name="status_intervensi" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
+                    <option value="">Semua Status Bimbingan</option>
+                    <option value="Belum Ditindaklanjuti" {{ request('status_intervensi') == 'Belum Ditindaklanjuti' ? 'selected' : '' }}>Belum Ditindaklanjuti</option>
+                    <option value="Dijadwalkan Bimbingan" {{ request('status_intervensi') == 'Dijadwalkan Bimbingan' ? 'selected' : '' }}>Dijadwalkan Bimbingan</option>
+                    <option value="Sedang Bimbingan" {{ request('status_intervensi') == 'Sedang Bimbingan' ? 'selected' : '' }}>Sedang Bimbingan</option>
+                    <option value="Selesai / Teratasi" {{ request('status_intervensi') == 'Selesai / Teratasi' ? 'selected' : '' }}>Selesai / Teratasi</option>
+                </select>
+
+                @if(request()->has('semester') || request()->has('status_intervensi'))
+                    <a href="{{ $ewsIndexRoute }}" class="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition" title="Reset Filter">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                     </a>
                 @endif
             </form>
@@ -88,30 +108,33 @@
             <table class="w-full text-left text-xs">
                 <thead>
                     <tr class="text-slate-400 border-b border-slate-100">
-                        <th class="pb-3 font-semibold">NIM</th>
+                        <th class="pb-3 font-semibold w-24">NIM</th>
                         <th class="pb-3 font-semibold">Nama Mahasiswa</th>
                         <th class="pb-3 font-semibold">Semester</th>
-                        <th class="pb-3 font-semibold">IPK</th>
+                        <th class="pb-3 font-semibold">IPK / IPS</th>
                         <th class="pb-3 font-semibold">Kehadiran</th>
-                        <th class="pb-3 font-semibold">SKS Gagal</th>
-                        <th class="pb-3 font-semibold">Faktor Pemicu Risiko</th>
-                        <th class="pb-3 font-semibold text-right">Tindakan Cepat</th>
+                        <th class="pb-3 font-semibold">Faktor Masalah</th>
+                        <th class="pb-3 font-semibold">Status Intervensi PA</th>
+                        <th class="pb-3 font-semibold text-right">Aksi Tindak Lanjut</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($alertList as $akd)
                         <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-3.5 font-mono font-bold text-rose-700">{{ $akd->mahasiswa->nim }}</td>
-                            <td class="py-3.5 font-semibold text-slate-900">{{ $akd->mahasiswa->nama }}</td>
-                            <td class="py-3.5 text-slate-600 font-medium">Sem {{ $akd->semester }}</td>
-                            <td class="py-3.5 font-bold {{ $akd->ipk < 2.75 ? 'text-rose-600' : 'text-slate-900' }}">{{ $akd->ipk }}</td>
-                            <td class="py-3.5 font-semibold {{ $akd->persentase_kehadiran < 75 ? 'text-rose-600' : 'text-slate-700' }}">
+                            <td class="py-3 font-mono font-bold text-rose-700">{{ $akd->mahasiswa->nim }}</td>
+                            <td class="py-3">
+                                <p class="font-bold text-slate-900">{{ $akd->mahasiswa->nama }}</p>
+                                <p class="text-[10px] text-slate-400">Angkatan {{ $akd->mahasiswa->angkatan ?? '-' }}</p>
+                            </td>
+                            <td class="py-3 text-slate-700 font-medium">Semester {{ $akd->semester }}</td>
+                            <td class="py-3">
+                                <span class="font-bold {{ $akd->ipk < 2.75 ? 'text-rose-600' : 'text-slate-900' }}">{{ $akd->ipk }}</span>
+                                <span class="text-[10px] text-slate-400 block font-mono">IPS: {{ $akd->ips }}</span>
+                            </td>
+                            <td class="py-3 font-semibold {{ $akd->persentase_kehadiran < 75 ? 'text-rose-600' : 'text-slate-700' }}">
                                 {{ $akd->persentase_kehadiran }}%
                             </td>
-                            <td class="py-3.5 text-slate-700 {{ $akd->sks_tidak_lulus > 0 ? 'text-rose-600 font-bold' : '' }}">
-                                {{ $akd->sks_tidak_lulus }} SKS
-                            </td>
-                            <td class="py-3.5">
+                            <td class="py-3">
                                 @if($akd->status_cuti)
                                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Sedang Cuti</span>
                                 @elseif($akd->ipk < 2.75 && $akd->persentase_kehadiran < 75)
@@ -121,17 +144,53 @@
                                 @elseif($akd->persentase_kehadiran < 75)
                                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Kehadiran &lt; 75%</span>
                                 @else
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">SKS Mengulang</span>
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">{{ $akd->sks_tidak_lulus }} SKS Mengulang</span>
                                 @endif
                             </td>
-                            <td class="py-3.5 text-right">
+                            <td class="py-3">
                                 @php
-                                    $prediksiSingleUrl = (auth()->user()->isAdmin() ? route('admin.prediksi.single') : route('prodi.prediksi.single')) . '?mahasiswa_id=' . $akd->mahasiswa_id;
+                                    $st = $akd->status_intervensi ?? 'Belum Ditindaklanjuti';
                                 @endphp
-                                <a href="{{ $prediksiSingleUrl }}" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-[11px] border border-rose-200 transition">
-                                    <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>
-                                    Analisis C4.5
-                                </a>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold
+                                    @if($st === 'Selesai / Teratasi') bg-brand-50 text-brand-700 border border-brand-200
+                                    @elseif($st === 'Sedang Bimbingan') bg-blue-50 text-blue-700 border border-blue-200
+                                    @elseif($st === 'Dijadwalkan Bimbingan') bg-amber-50 text-amber-700 border border-amber-200
+                                    @else bg-rose-50 text-rose-700 border border-rose-200
+                                    @endif">
+                                    @if($st === 'Selesai / Teratasi')
+                                        <i data-lucide="check-circle" class="w-3 h-3 text-brand-600 flex-shrink-0"></i>
+                                    @elseif($st === 'Sedang Bimbingan')
+                                        <i data-lucide="clock" class="w-3 h-3 text-blue-600 flex-shrink-0"></i>
+                                    @elseif($st === 'Dijadwalkan Bimbingan')
+                                        <i data-lucide="calendar" class="w-3 h-3 text-amber-600 flex-shrink-0"></i>
+                                    @else
+                                        <i data-lucide="alert-circle" class="w-3 h-3 text-rose-600 flex-shrink-0"></i>
+                                    @endif
+                                    <span>{{ $st }}</span>
+                                </span>
+                                @if($akd->tindakan_intervensi)
+                                    <p class="text-[10px] text-slate-600 mt-1 truncate max-w-[180px]" title="{{ $akd->tindakan_intervensi }}">
+                                        {{ $akd->tindakan_intervensi }}
+                                    </p>
+                                @endif
+                                @if($akd->dosenPa)
+                                    <p class="text-[9px] text-slate-400 mt-0.5">Oleh: {{ $akd->dosenPa->name }}</p>
+                                @endif
+                            </td>
+                            <td class="py-3 text-right">
+                                <div class="inline-flex items-center space-x-1.5">
+                                    <button type="button" onclick="openEwsModal('ews-modal-{{ $akd->id }}')" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[11px] border border-indigo-200 transition">
+                                        <i data-lucide="clipboard-edit" class="w-3 h-3 mr-1"></i>
+                                        Bimbingan PA
+                                    </button>
+
+                                    @php
+                                        $prediksiSingleUrl = (auth()->user()->isAdmin() ? route('admin.prediksi.single') : route('prodi.prediksi.single')) . '?mahasiswa_id=' . $akd->mahasiswa_id;
+                                    @endphp
+                                    <a href="{{ $prediksiSingleUrl }}" class="inline-flex items-center px-2 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-[11px] border border-slate-200 transition" title="Simulasi Prediksi C4.5">
+                                        <i data-lucide="sparkles" class="w-3 h-3 text-purple-600"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -149,4 +208,118 @@
     </div>
 
 </div>
+
+<!-- Counseling Modals for Each Alerted Student -->
+@foreach($alertList as $akd)
+    @php
+        $updateRoute = auth()->user()->isAdmin() ? route('admin.ews.intervensi.update', $akd) : route('prodi.ews.intervensi.update', $akd);
+    @endphp
+    <div id="ews-modal-{{ $akd->id }}" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            
+            <!-- Modal Header -->
+            <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 flex items-center justify-center">
+                        <i data-lucide="clipboard-edit" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-900 uppercase">Tindak Lanjut Bimbingan Akademik (Dosen PA)</h4>
+                        <p class="text-[10px] text-slate-500">Pencatatan konseling intervensi mahasiswa EWS</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEwsModal('ews-modal-{{ $akd->id }}')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Student Summary Context -->
+            <div class="p-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between text-xs">
+                <div>
+                    <h5 class="font-bold text-slate-900">{{ $akd->mahasiswa->nama }}</h5>
+                    <p class="text-[11px] font-mono text-brand-700">NIM: {{ $akd->mahasiswa->nim }} • Sem {{ $akd->semester }}</p>
+                </div>
+                <div class="text-right">
+                    <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                        IPK: {{ $akd->ipk }} • Absen: {{ $akd->persentase_kehadiran }}%
+                    </span>
+                    <p class="text-[10px] text-slate-400 mt-0.5">SKS Gagal: {{ $akd->sks_tidak_lulus }} SKS</p>
+                </div>
+            </div>
+
+            <!-- Form Body -->
+            <form method="POST" action="{{ $updateRoute }}" class="p-5 space-y-4 text-xs">
+                @csrf
+                @method('PUT')
+
+                <!-- Status Intervensi -->
+                <div class="space-y-1">
+                    <label class="font-bold text-slate-700 block">Status Intervensi / Bimbingan:</label>
+                    <select name="status_intervensi" required class="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                        <option value="Belum Ditindaklanjuti" {{ ($akd->status_intervensi ?? '') === 'Belum Ditindaklanjuti' ? 'selected' : '' }}>Belum Ditindaklanjuti</option>
+                        <option value="Dijadwalkan Bimbingan" {{ ($akd->status_intervensi ?? '') === 'Dijadwalkan Bimbingan' ? 'selected' : '' }}>Dijadwalkan Bimbingan</option>
+                        <option value="Sedang Bimbingan" {{ ($akd->status_intervensi ?? '') === 'Sedang Bimbingan' ? 'selected' : '' }}>Sedang Bimbingan</option>
+                        <option value="Selesai / Teratasi" {{ ($akd->status_intervensi ?? '') === 'Selesai / Teratasi' ? 'selected' : '' }}>Selesai / Teratasi</option>
+                    </select>
+                </div>
+
+                <!-- Bentuk Tindakan -->
+                <div class="space-y-1">
+                    <label class="font-bold text-slate-700 block">Bentuk Tindakan / Rekomendasi PA:</label>
+                    <select name="tindakan_intervensi" class="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                        <option value="">-- Pilih Bentuk Tindakan --</option>
+                        <option value="Konseling Akademik Rutin Terjadwal" {{ ($akd->tindakan_intervensi ?? '') === 'Konseling Akademik Rutin Terjadwal' ? 'selected' : '' }}>Konseling Akademik Rutin Terjadwal</option>
+                        <option value="Restrukturisasi Beban SKS Semester Depan" {{ ($akd->tindakan_intervensi ?? '') === 'Restrukturisasi Beban SKS Semester Depan' ? 'selected' : '' }}>Restrukturisasi Beban SKS Semester Depan</option>
+                        <option value="Program Remedial / Pengulangan Mata Kuliah" {{ ($akd->tindakan_intervensi ?? '') === 'Program Remedial / Pengulangan Mata Kuliah' ? 'selected' : '' }}>Program Remedial / Pengulangan Mata Kuliah</option>
+                        <option value="Peringatan Kehadiran & Surat Teguran Absensi" {{ ($akd->tindakan_intervensi ?? '') === 'Peringatan Kehadiran & Surat Teguran Absensi' ? 'selected' : '' }}>Peringatan Kehadiran & Surat Teguran Absensi</option>
+                        <option value="Pemanggilan Orang Tua / Wali Mahasiswa" {{ ($akd->tindakan_intervensi ?? '') === 'Pemanggilan Orang Tua / Wali Mahasiswa' ? 'selected' : '' }}>Pemanggilan Orang Tua / Wali Mahasiswa</option>
+                        <option value="Rekomendasi Cuti Akademik Sementara" {{ ($akd->tindakan_intervensi ?? '') === 'Rekomendasi Cuti Akademik Sementara' ? 'selected' : '' }}>Rekomendasi Cuti Akademik Sementara</option>
+                        <option value="Lainnya" {{ ($akd->tindakan_intervensi ?? '') === 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                    </select>
+                </div>
+
+                <!-- Tanggal Bimbingan -->
+                <div class="space-y-1">
+                    <label class="font-bold text-slate-700 block">Tanggal Bimbingan / Intervensi:</label>
+                    <input type="date" name="tanggal_intervensi" value="{{ $akd->tanggal_intervensi ? $akd->tanggal_intervensi->format('Y-m-d') : date('Y-m-d') }}" class="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+                </div>
+
+                <!-- Catatan Bimbingan / Solusi -->
+                <div class="space-y-1">
+                    <label class="font-bold text-slate-700 block">Catatan Bimbingan & Kesepakatan Solusi:</label>
+                    <textarea name="catatan_intervensi" rows="3" placeholder="Tuliskan hasil diskusi, penyebab kendala studi mahasiswa, serta komitmen perbaikan nilai..." class="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">{{ $akd->catatan_intervensi }}</textarea>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-2 flex items-center justify-end space-x-2">
+                    <button type="button" onclick="closeEwsModal('ews-modal-{{ $akd->id }}')" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-xs transition flex items-center">
+                        <i data-lucide="save" class="w-3.5 h-3.5 mr-1.5"></i>
+                        Simpan Tindak Lanjut
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+@endforeach
+
+<script>
+    function openEwsModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.remove('hidden');
+            if (window.lucide) { lucide.createIcons(); }
+        }
+    }
+
+    function closeEwsModal(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+</script>
 @endsection

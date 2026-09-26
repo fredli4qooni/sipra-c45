@@ -129,6 +129,50 @@
             </div>
         </div>
 
+        <!-- Dosen PA Counseling Intervention Status Banner -->
+        @if($latestAkademik && $latestAkademik->status_intervensi && $latestAkademik->status_intervensi !== 'Belum Ditindaklanjuti')
+            <div class="bg-white p-6 rounded-xl border border-indigo-200/90 shadow-xs space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                            <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                        </div>
+                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Status Bimbingan Akademik (Dosen PA)</h4>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold
+                        @if($latestAkademik->status_intervensi === 'Selesai / Teratasi') bg-brand-50 text-brand-700 border border-brand-200
+                        @elseif($latestAkademik->status_intervensi === 'Sedang Bimbingan') bg-blue-50 text-blue-700 border border-blue-200
+                        @else bg-amber-50 text-amber-700 border border-amber-200 @endif">
+                        {{ $latestAkademik->status_intervensi }}
+                    </span>
+                </div>
+
+                <div class="p-4 rounded-lg bg-indigo-50/40 border border-indigo-100 text-xs space-y-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <p class="font-bold text-slate-900">
+                            Bentuk Intervensi: <span class="text-indigo-900 font-semibold">{{ $latestAkademik->tindakan_intervensi ?? 'Konseling Akademik' }}</span>
+                        </p>
+                        @if($latestAkademik->tanggal_intervensi)
+                            <p class="text-[11px] text-slate-500">
+                                Tanggal: <strong class="text-slate-700">{{ $latestAkademik->tanggal_intervensi->format('d F Y') }}</strong>
+                            </p>
+                        @endif
+                    </div>
+                    @if($latestAkademik->catatan_intervensi)
+                        <div class="pt-2 border-t border-indigo-100/80">
+                            <p class="text-[11px] font-semibold text-slate-700">Catatan & Kesepakatan Solusi Bimbingan:</p>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed italic bg-white p-3 rounded-lg border border-slate-200">
+                                "{{ $latestAkademik->catatan_intervensi }}"
+                            </p>
+                        </div>
+                    @endif
+                    @if($latestAkademik->dosenPa)
+                        <p class="text-[10px] text-slate-400 text-right">Dosen Pembimbing: {{ $latestAkademik->dosenPa->name }}</p>
+                    @endif
+                </div>
+            </div>
+        @endif
+
     @endif
 
 </div>

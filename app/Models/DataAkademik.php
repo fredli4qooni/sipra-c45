@@ -32,6 +32,11 @@ class DataAkademik extends Model
         'label_risiko_aktual',
         'label_do_aktual',
         'keterangan',
+        'status_intervensi',
+        'tindakan_intervensi',
+        'catatan_intervensi',
+        'tanggal_intervensi',
+        'dosen_pa_id',
     ];
 
     protected function casts(): array
@@ -41,12 +46,18 @@ class DataAkademik extends Model
             'ipk' => 'decimal:2',
             'persentase_kehadiran' => 'decimal:2',
             'status_cuti' => 'boolean',
+            'tanggal_intervensi' => 'datetime',
         ];
     }
 
     public function mahasiswa(): BelongsTo
     {
         return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
+    }
+
+    public function dosenPa(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dosen_pa_id');
     }
 
     /**
