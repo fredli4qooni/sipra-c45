@@ -21,6 +21,7 @@ class RealMahasiswaSeeder extends Seeder
         Mahasiswa::query()->delete();
 
         $pingkyUser = User::where('nim_nip', '2271020052')->first();
+        $dosenPas = User::where('role', 'dosen_pa')->get();
 
         $baseDir = database_path();
         $files = [
@@ -113,10 +114,17 @@ class RealMahasiswaSeeder extends Seeder
                     $userId = $pingkyUser->id;
                 }
 
+                // Hubungkan dosen_pa_id
+                $dosenPaId = null;
+                if ($dosenPas->isNotEmpty()) {
+                    $dosenPaId = $dosenPas[abs(crc32($rawNim . 'dosen')) % $dosenPas->count()]->id;
+                }
+
                 // 2. Insert Mahasiswa
                 $mahasiswa = Mahasiswa::create([
                     'nim' => $rawNim,
                     'nama' => $nama,
+                    'dosen_pa_id' => $dosenPaId,
                     'angkatan' => $angkatan,
                     'jenis_kelamin' => $gender,
                     'jalur_masuk' => $jalur,

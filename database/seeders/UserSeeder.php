@@ -39,15 +39,28 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 3. Dosen Pembimbing Akademik (Dosen PA)
+        // 3. Dosen Pembimbing Akademik (Dosen PA 1)
         User::updateOrCreate(
             ['email' => 'dosenpa@uinril.ac.id'],
             [
-                'name' => 'Dosen Pembimbing Akademik, M.T.I.',
+                'name' => 'Dr. H. Ahmad Sudrajat, M.T.I.',
                 'password' => Hash::make('dosen123'),
                 'role' => 'dosen_pa',
                 'nim_nip' => '198503102012011002',
                 'phone' => '081234567892',
+                'status' => 'active',
+            ]
+        );
+
+        // 3b. Dosen Pembimbing Akademik (Dosen PA 2)
+        User::updateOrCreate(
+            ['email' => 'dosenpa2@uinril.ac.id'],
+            [
+                'name' => 'Siti Nurhaliza, S.Kom., M.Cs.',
+                'password' => Hash::make('dosen123'),
+                'role' => 'dosen_pa',
+                'nim_nip' => '198807202015042003',
+                'phone' => '081234567893',
                 'status' => 'active',
             ]
         );

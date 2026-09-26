@@ -21,9 +21,9 @@
         </div>
 
         <!-- Filter Form -->
-        <form method="GET" action="{{ route('admin.mahasiswa.index') }}" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
+        <form method="GET" action="{{ route('admin.mahasiswa.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2">
             <!-- Search -->
-            <div class="relative sm:col-span-2">
+            <div class="relative sm:col-span-2 lg:col-span-2">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <i data-lucide="search" class="w-4 h-4"></i>
                 </div>
@@ -46,6 +46,17 @@
                 </select>
             </div>
 
+            <!-- Filter Dosen PA -->
+            <div>
+                <select name="dosen_pa_id" onchange="this.form.submit()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <option value="">Semua Dosen PA</option>
+                    <option value="unassigned" {{ request('dosen_pa_id') == 'unassigned' ? 'selected' : '' }}>Belum Ada PA</option>
+                    @foreach($dosenPas as $dosen)
+                        <option value="{{ $dosen->id }}" {{ request('dosen_pa_id') == $dosen->id ? 'selected' : '' }}>PA: {{ Str::limit($dosen->name, 18) }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <!-- Filter Status -->
             <div class="flex items-center space-x-2">
                 <select name="status_mahasiswa" onchange="this.form.submit()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
@@ -55,8 +66,8 @@
                     <option value="Lulus" {{ request('status_mahasiswa') == 'Lulus' ? 'selected' : '' }}>Lulus</option>
                     <option value="Drop Out" {{ request('status_mahasiswa') == 'Drop Out' ? 'selected' : '' }}>Drop Out</option>
                 </select>
-                @if(request()->hasAny(['search', 'angkatan', 'status_mahasiswa']))
-                    <a href="{{ route('admin.mahasiswa.index') }}" title="Reset Filter" class="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition">
+                @if(request()->hasAny(['search', 'angkatan', 'status_mahasiswa', 'dosen_pa_id']))
+                    <a href="{{ route('admin.mahasiswa.index') }}" title="Reset Filter" class="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition flex-shrink-0">
                         <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     </a>
                 @endif
@@ -72,6 +83,7 @@
                     <tr class="text-slate-400 border-b border-slate-100">
                         <th class="pb-3 font-semibold">NIM</th>
                         <th class="pb-3 font-semibold">Nama Mahasiswa</th>
+                        <th class="pb-3 font-semibold">Dosen PA</th>
                         <th class="pb-3 font-semibold">L/P</th>
                         <th class="pb-3 font-semibold">Angkatan</th>
                         <th class="pb-3 font-semibold">Jalur Masuk</th>
@@ -87,6 +99,16 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3.5 font-mono font-bold text-brand-700">{{ $mhs->nim }}</td>
                             <td class="py-3.5 font-semibold text-slate-900">{{ $mhs->nama }}</td>
+                            <td class="py-3.5">
+                                @if($mhs->dosenPa)
+                                    <span class="inline-flex items-center text-slate-700 font-medium" title="{{ $mhs->dosenPa->name }}">
+                                        <i data-lucide="user-check" class="w-3.5 h-3.5 text-brand-600 mr-1 flex-shrink-0"></i>
+                                        <span class="truncate max-w-[140px]">{{ $mhs->dosenPa->name }}</span>
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 italic text-[11px]">Belum diatur</span>
+                                @endif
+                            </td>
                             <td class="py-3.5 text-slate-500">{{ $mhs->jenis_kelamin }}</td>
                             <td class="py-3.5 text-slate-600 font-medium">{{ $mhs->angkatan }}</td>
                             <td class="py-3.5">
@@ -124,7 +146,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="py-8 text-center text-slate-400">Tidak ada data mahasiswa yang sesuai dengan filter.</td>
+                            <td colspan="10" class="py-8 text-center text-slate-400">Tidak ada data mahasiswa yang sesuai dengan filter.</td>
                         </tr>
                     @endforelse
                 </tbody>

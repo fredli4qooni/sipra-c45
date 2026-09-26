@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DataAkademik;
 use App\Models\Mahasiswa;
 use App\Models\C45Model;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,7 +16,9 @@ class EwsController extends Controller
      */
     public function index(Request $request)
     {
-        $baseQuery = DataAkademik::with(['mahasiswa', 'dosenPa'])
+        $user = Auth::user();
+
+        $baseQuery = DataAkademik::with(['mahasiswa.dosenPa', 'dosenPa'])
             ->where(function ($q) {
                 $q->where('label_risiko_aktual', 'Risiko Tinggi')
                   ->orWhere('ipk', '<', 2.75)
@@ -24,7 +27,32 @@ class EwsController extends Controller
                   ->orWhere('status_cuti', true);
             });
 
+        // Calculate Advisee vs All count for Dosen PA
+        $myBimbinganCount = (clone $baseQuery)->whereHas('mahasiswa', function ($q) use ($user) {
+            $q->where('dosen_pa_id', $user->id);
+        })->count();
+
+        $allAlertCount = (clone $baseQuery)->count();
+
+        // Scope handling: default to 'bimbingan_saya' for Dosen PA, 'semua' for others
+        $scope = $request->input('scope', $user->isDosenPa() ? 'bimbingan_saya' : 'semua');
+
         $query = clone $baseQuery;
+
+        if ($user->isDosenPa() && $scope === 'bimbingan_saya') {
+            $query->whereHas('mahasiswa', function ($q) use ($user) {
+                $q->where('dosen_pa_id', $user->id);
+            });
+        }
+
+        // Filter by specific Dosen PA (Admin / Prodi filter)
+        if ($dosenPaId = $request->input('dosen_pa_id')) {
+            if ($dosenPaId === 'unassigned') {
+                $query->whereHas('mahasiswa', fn($q) => $q->whereNull('dosen_pa_id'));
+            } else {
+                $query->whereHas('mahasiswa', fn($q) => $q->where('dosen_pa_id', $dosenPaId));
+            }
+        }
 
         if ($semester = $request->input('semester')) {
             $query->where('semester', $semester);
@@ -42,21 +70,26 @@ class EwsController extends Controller
 
         $alertList = $query->orderBy('ipk', 'asc')->paginate(12)->withQueryString();
 
-        // High priority counts
-        $criticalCount = (clone $baseQuery)->where('label_risiko_aktual', 'Risiko Tinggi')->count();
-        $attendanceRiskCount = (clone $baseQuery)->where('persentase_kehadiran', '<', 75.0)->count();
-        $gpaRiskCount = (clone $baseQuery)->where('ipk', '<', 2.75)->count();
-        $cutiCount = (clone $baseQuery)->where('status_cuti', true)->count();
+        // Metrics breakdown calculated from scoped query or base query
+        $metricsBase = ($user->isDosenPa() && $scope === 'bimbingan_saya')
+            ? (clone $baseQuery)->whereHas('mahasiswa', fn($q) => $q->where('dosen_pa_id', $user->id))
+            : (clone $baseQuery);
+
+        $criticalCount = (clone $metricsBase)->where('label_risiko_aktual', 'Risiko Tinggi')->count();
+        $attendanceRiskCount = (clone $metricsBase)->where('persentase_kehadiran', '<', 75.0)->count();
+        $gpaRiskCount = (clone $metricsBase)->where('ipk', '<', 2.75)->count();
+        $cutiCount = (clone $metricsBase)->where('status_cuti', true)->count();
 
         // Intervention status counts
-        $pendingInterventionCount = (clone $baseQuery)->where(function($q) {
+        $pendingInterventionCount = (clone $metricsBase)->where(function($q) {
             $q->whereNull('status_intervensi')
               ->orWhere('status_intervensi', 'Belum Ditindaklanjuti');
         })->count();
 
-        $completedInterventionCount = (clone $baseQuery)->where('status_intervensi', 'Selesai / Teratasi')->count();
+        $completedInterventionCount = (clone $metricsBase)->where('status_intervensi', 'Selesai / Teratasi')->count();
 
         $activeModel = C45Model::active()->first();
+        $dosenPas = User::where('role', 'dosen_pa')->orderBy('name')->get();
 
         return view('ews.index', compact(
             'alertList',
@@ -66,7 +99,11 @@ class EwsController extends Controller
             'cutiCount',
             'pendingInterventionCount',
             'completedInterventionCount',
-            'activeModel'
+            'activeModel',
+            'scope',
+            'myBimbinganCount',
+            'allAlertCount',
+            'dosenPas'
         ));
     }
 

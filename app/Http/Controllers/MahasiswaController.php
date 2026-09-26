@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MahasiswaController extends Controller
@@ -12,7 +13,7 @@ class MahasiswaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Mahasiswa::with('latestAkademik');
+        $query = Mahasiswa::with(['latestAkademik', 'dosenPa']);
 
         // Search by NIM or Name
         if ($search = $request->input('search')) {
@@ -32,10 +33,20 @@ class MahasiswaController extends Controller
             $query->where('status_mahasiswa', $status);
         }
 
+        // Filter by Dosen PA
+        if ($dosenPaId = $request->input('dosen_pa_id')) {
+            if ($dosenPaId === 'unassigned') {
+                $query->whereNull('dosen_pa_id');
+            } else {
+                $query->where('dosen_pa_id', $dosenPaId);
+            }
+        }
+
         $mahasiswas = $query->orderBy('nim', 'asc')->paginate(10)->withQueryString();
         $angkatans = Mahasiswa::select('angkatan')->distinct()->orderBy('angkatan', 'desc')->pluck('angkatan');
+        $dosenPas = User::where('role', 'dosen_pa')->orderBy('name')->get();
 
-        return view('mahasiswa.index', compact('mahasiswas', 'angkatans'));
+        return view('mahasiswa.index', compact('mahasiswas', 'angkatans', 'dosenPas'));
     }
 
     /**
@@ -43,7 +54,8 @@ class MahasiswaController extends Controller
      */
     public function create()
     {
-        return view('mahasiswa.create');
+        $dosenPas = User::where('role', 'dosen_pa')->orderBy('name')->get();
+        return view('mahasiswa.create', compact('dosenPas'));
     }
 
     /**
@@ -54,6 +66,7 @@ class MahasiswaController extends Controller
         $validated = $request->validate([
             'nim' => ['required', 'string', 'max:30', 'unique:mahasiswas,nim'],
             'nama' => ['required', 'string', 'max:150'],
+            'dosen_pa_id' => ['nullable', 'exists:users,id'],
             'angkatan' => ['required', 'integer', 'min:2018', 'max:' . (date('Y') + 1)],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'jalur_masuk' => ['nullable', 'string', 'max:50'],
@@ -67,6 +80,7 @@ class MahasiswaController extends Controller
             'nim.unique' => 'NIM sudah terdaftar dalam sistem.',
             'nama.required' => 'Nama mahasiswa wajib diisi.',
             'angkatan.required' => 'Tahun angkatan wajib dipilih.',
+            'dosen_pa_id.exists' => 'Dosen PA yang dipilih tidak valid.',
         ]);
 
         Mahasiswa::create($validated);
@@ -80,7 +94,7 @@ class MahasiswaController extends Controller
      */
     public function show(Mahasiswa $mahasiswa)
     {
-        $mahasiswa->load(['dataAkademiks', 'prediksis.model', 'latestPrediksi']);
+        $mahasiswa->load(['dataAkademiks', 'prediksis.model', 'latestPrediksi', 'dosenPa']);
         return view('mahasiswa.show', compact('mahasiswa'));
     }
 
@@ -89,7 +103,8 @@ class MahasiswaController extends Controller
      */
     public function edit(Mahasiswa $mahasiswa)
     {
-        return view('mahasiswa.edit', compact('mahasiswa'));
+        $dosenPas = User::where('role', 'dosen_pa')->orderBy('name')->get();
+        return view('mahasiswa.edit', compact('mahasiswa', 'dosenPas'));
     }
 
     /**
@@ -100,6 +115,7 @@ class MahasiswaController extends Controller
         $validated = $request->validate([
             'nim' => ['required', 'string', 'max:30', 'unique:mahasiswas,nim,' . $mahasiswa->id],
             'nama' => ['required', 'string', 'max:150'],
+            'dosen_pa_id' => ['nullable', 'exists:users,id'],
             'angkatan' => ['required', 'integer', 'min:2018', 'max:' . (date('Y') + 1)],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'jalur_masuk' => ['nullable', 'string', 'max:50'],

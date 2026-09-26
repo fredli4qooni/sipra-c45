@@ -16,6 +16,7 @@ class Mahasiswa extends Model
 
     protected $fillable = [
         'user_id',
+        'dosen_pa_id',
         'nim',
         'nama',
         'angkatan',
@@ -31,6 +32,11 @@ class Mahasiswa extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function dosenPa(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dosen_pa_id');
     }
 
     public function dataAkademiks(): HasMany

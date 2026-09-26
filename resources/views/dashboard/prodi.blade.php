@@ -15,6 +15,41 @@
 @section('content')
 <div class="space-y-6">
 
+    <!-- Dosen PA Advisee Spotlight Banner -->
+    @if(auth()->user()->isDosenPa())
+        <div class="bg-amber-50/70 p-5 rounded-xl border border-amber-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 rounded-lg bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h4 class="text-sm font-bold text-slate-900">Perhatian Dosen Pembimbing Akademik (Dosen PA)</h4>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900">
+                            {{ $myBimbinganTotal }} Mahasiswa Bimbingan
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-1">
+                        @if($myBimbinganHighRisk > 0)
+                            <span class="text-rose-700 font-bold">⚠️ Terdapat {{ $myBimbinganHighRisk }} mahasiswa bimbingan Anda dengan status Risiko Tinggi</span>
+                            @if($myBimbinganPendingIntervention > 0)
+                                • <span class="text-amber-800 font-semibold">{{ $myBimbinganPendingIntervention }} menunggu tindak lanjut bimbingan EWS</span>
+                            @endif
+                        @else
+                            <span class="text-emerald-700 font-medium">✓ Seluruh mahasiswa bimbingan Anda terpantau aman dan tidak memiliki peringatan risiko kritis.</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <a href="{{ route('prodi.ews.index') }}?scope=bimbingan_saya" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-xs transition inline-flex items-center">
+                    <i data-lucide="shield-alert" class="w-3.5 h-3.5 mr-1.5"></i>
+                    Bimbingan Saya ({{ $myBimbinganHighRisk }})
+                </a>
+            </div>
+        </div>
+    @endif
+
     <!-- 3 Stat Cards Grid (Matching Reference Design) -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
@@ -116,6 +151,7 @@
                     <tr class="text-slate-400 border-b border-slate-100">
                         <th class="pb-2.5 font-semibold">NIM</th>
                         <th class="pb-2.5 font-semibold">Nama Mahasiswa</th>
+                        <th class="pb-2.5 font-semibold">Dosen PA</th>
                         <th class="pb-2.5 font-semibold">Semester</th>
                         <th class="pb-2.5 font-semibold">IPK</th>
                         <th class="pb-2.5 font-semibold">Kehadiran</th>
@@ -127,7 +163,25 @@
                     @forelse($highRiskStudents as $akd)
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3 font-mono font-bold text-rose-700">{{ $akd->mahasiswa->nim }}</td>
-                            <td class="py-3 font-semibold text-slate-900">{{ $akd->mahasiswa->nama }}</td>
+                            <td class="py-3">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-semibold text-slate-900">{{ $akd->mahasiswa->nama }}</span>
+                                    @if(auth()->user()->isDosenPa() && $akd->mahasiswa->dosen_pa_id === auth()->id())
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                            <i data-lucide="star" class="w-2.5 h-2.5 mr-0.5 fill-amber-400"></i> Bimbingan Anda
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                @if($akd->mahasiswa->dosenPa)
+                                    <span class="text-slate-700 font-medium text-[11px] block truncate max-w-[130px]" title="{{ $akd->mahasiswa->dosenPa->name }}">
+                                        {{ $akd->mahasiswa->dosenPa->name }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 italic text-[10px]">Belum diatur</span>
+                                @endif
+                            </td>
                             <td class="py-3 text-slate-500">Sem {{ $akd->semester }}</td>
                             <td class="py-3 font-bold {{ $akd->ipk < 2.75 ? 'text-rose-600' : 'text-slate-900' }}">{{ $akd->ipk }}</td>
                             <td class="py-3 font-semibold {{ $akd->persentase_kehadiran < 75 ? 'text-rose-600' : 'text-slate-600' }}">
@@ -139,15 +193,15 @@
                                 </span>
                             </td>
                             <td class="py-3 text-right">
-                                <a href="{{ route('prodi.prediksi.single') }}?mahasiswa_id={{ $akd->mahasiswa_id }}" class="px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-[11px] border border-brand-200/60 transition inline-flex items-center">
-                                    <span>Simulasi PA</span>
+                                <a href="{{ route('prodi.ews.index') }}" class="px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-[11px] border border-brand-200/60 transition inline-flex items-center">
+                                    <span>Tindak Lanjut PA</span>
                                     <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-6 text-center text-slate-400">Tidak ada mahasiswa yang berada dalam kategori risiko tinggi saat ini.</td>
+                            <td colspan="8" class="py-6 text-center text-slate-400">Tidak ada mahasiswa yang berada dalam kategori risiko tinggi saat ini.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -40,7 +40,21 @@
             </div>
         </div>
 
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 text-center min-w-[140px]">
+                <p class="text-[10px] text-slate-400 uppercase font-bold">Dosen Pembimbing (PA)</p>
+                @if($mahasiswa->dosenPa)
+                    <p class="text-xs font-bold text-slate-900 mt-1 flex items-center justify-center">
+                        <i data-lucide="user-check" class="w-3.5 h-3.5 text-brand-600 mr-1"></i>
+                        {{ $mahasiswa->dosenPa->name }}
+                    </p>
+                @else
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium mt-1 bg-slate-100 text-slate-500">
+                        Belum Diatur
+                    </span>
+                @endif
+            </div>
+
             <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 text-center min-w-[120px]">
                 <p class="text-[10px] text-slate-400 uppercase font-bold">Status Studi</p>
                 <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold mt-1

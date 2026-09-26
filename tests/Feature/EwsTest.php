@@ -50,4 +50,25 @@ class EwsTest extends TestCase
             'tindakan_intervensi' => 'Konseling Akademik Rutin Terjadwal',
         ]);
     }
+
+    public function test_dosen_pa_can_view_ews_with_dual_scope(): void
+    {
+        $dosenPa = User::where('role', 'dosen_pa')->first();
+        $this->assertNotNull($dosenPa);
+
+        // 1. Default / bimbingan_saya scope
+        $responseBimbingan = $this->actingAs($dosenPa)->get(route('prodi.ews.index', ['scope' => 'bimbingan_saya']));
+        $responseBimbingan->assertStatus(200);
+        $responseBimbingan->assertSee('Mahasiswa Bimbingan Saya');
+
+        // 2. semua scope
+        $responseSemua = $this->actingAs($dosenPa)->get(route('prodi.ews.index', ['scope' => 'semua']));
+        $responseSemua->assertStatus(200);
+        $responseSemua->assertSee('Semua Mahasiswa Prodi');
+
+        // 3. Dashboard shows Dosen PA banner
+        $responseDashboard = $this->actingAs($dosenPa)->get(route('prodi.dashboard'));
+        $responseDashboard->assertStatus(200);
+        $responseDashboard->assertSee('Perhatian Dosen Pembimbing Akademik');
+    }
 }

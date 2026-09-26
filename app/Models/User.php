@@ -121,6 +121,11 @@ class User extends Authenticatable
         return $this->hasOne(Mahasiswa::class, 'user_id');
     }
 
+    public function mahasiswaBimbingan(): HasMany
+    {
+        return $this->hasMany(Mahasiswa::class, 'dosen_pa_id');
+    }
+
     public function modelsCreated(): HasMany
     {
         return $this->hasMany(C45Model::class, 'created_by');

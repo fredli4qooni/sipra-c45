@@ -90,6 +90,21 @@
                 </div>
             </div>
 
+            <!-- Dosen Pembimbing Akademik (Dosen PA) -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Dosen Pembimbing Akademik (Dosen PA)</label>
+                <select name="dosen_pa_id" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    <option value="">-- Belum Ditentukan / Pilih Nanti --</option>
+                    @foreach($dosenPas as $dosen)
+                        <option value="{{ $dosen->id }}" {{ old('dosen_pa_id') == $dosen->id ? 'selected' : '' }}>
+                            {{ $dosen->name }} {{ $dosen->nim_nip ? '('.$dosen->nim_nip.')' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                <p class="text-[11px] text-slate-400 mt-1">Dosen PA yang bertanggung jawab memantau rekam jejak & melakukan tindak lanjut EWS mahasiswa ini</p>
+                @error('dosen_pa_id') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
+            </div>
+
             <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-100">
                 <a href="{{ route('admin.mahasiswa.index') }}" class="px-4 py-2.5 rounded-lg bg-slate-100 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
                     Batal

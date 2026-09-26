@@ -63,22 +63,65 @@
         </div>
     </div>
 
+    @php
+        $ewsIndexRoute = auth()->user()->isAdmin() ? route('admin.ews.index') : route('prodi.ews.index');
+    @endphp
+
+    <!-- Dosen PA / Scope Navigation Pills -->
+    @if(auth()->user()->isDosenPa())
+        <div class="flex items-center space-x-2 bg-slate-100/80 p-1.5 rounded-xl max-w-fit border border-slate-200/80">
+            <a href="{{ $ewsIndexRoute }}?scope=bimbingan_saya" 
+               class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center {{ $scope === 'bimbingan_saya' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                <i data-lucide="star" class="w-3.5 h-3.5 mr-1.5 {{ $scope === 'bimbingan_saya' ? 'fill-amber-400 text-amber-500' : 'text-slate-400' }}"></i>
+                Mahasiswa Bimbingan Saya
+                <span class="ml-2 px-1.5 py-0.5 rounded-md text-[10px] font-bold {{ $scope === 'bimbingan_saya' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-600' }}">
+                    {{ $myBimbinganCount }}
+                </span>
+            </a>
+
+            <a href="{{ $ewsIndexRoute }}?scope=semua" 
+               class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center {{ $scope === 'semua' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                <i data-lucide="users" class="w-3.5 h-3.5 mr-1.5 text-slate-400"></i>
+                Semua Mahasiswa Prodi
+                <span class="ml-2 px-1.5 py-0.5 rounded-md text-[10px] font-bold {{ $scope === 'semua' ? 'bg-slate-200 text-slate-800' : 'bg-slate-200 text-slate-600' }}">
+                    {{ $allAlertCount }}
+                </span>
+            </a>
+        </div>
+    @endif
+
     <!-- Alert List Table Card -->
     <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2.5">
                 <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
                 <div>
-                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Daftar Mahasiswa Terindikasi Masalah Akademik</h4>
+                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                        @if(auth()->user()->isDosenPa() && $scope === 'bimbingan_saya')
+                            Daftar Mahasiswa Bimbingan Anda (Perlu Pemantauan EWS)
+                        @else
+                            Daftar Mahasiswa Terindikasi Masalah Akademik
+                        @endif
+                    </h4>
                     <p class="text-[11px] text-slate-500">Klik "Bimbingan PA" untuk memperbarui status tindak lanjut dan mencatat hasil konsultasi</p>
                 </div>
             </div>
 
             <!-- Filter Toolbar -->
-            @php
-                $ewsIndexRoute = auth()->user()->isAdmin() ? route('admin.ews.index') : route('prodi.ews.index');
-            @endphp
             <form method="GET" action="{{ $ewsIndexRoute }}" class="flex flex-wrap items-center gap-2">
+                <input type="hidden" name="scope" value="{{ $scope }}">
+
+                <!-- Dosen PA Filter (For Admin, Prodi, or all students view) -->
+                @if(!auth()->user()->isDosenPa() || $scope === 'semua')
+                    <select name="dosen_pa_id" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
+                        <option value="">Semua Dosen PA</option>
+                        <option value="unassigned" {{ request('dosen_pa_id') == 'unassigned' ? 'selected' : '' }}>Belum Ada PA</option>
+                        @foreach($dosenPas as $dosen)
+                            <option value="{{ $dosen->id }}" {{ request('dosen_pa_id') == $dosen->id ? 'selected' : '' }}>PA: {{ Str::limit($dosen->name, 16) }}</option>
+                        @endforeach
+                    </select>
+                @endif
+
                 <!-- Semester Filter -->
                 <select name="semester" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
                     <option value="">Semua Semester</option>
@@ -96,8 +139,8 @@
                     <option value="Selesai / Teratasi" {{ request('status_intervensi') == 'Selesai / Teratasi' ? 'selected' : '' }}>Selesai / Teratasi</option>
                 </select>
 
-                @if(request()->has('semester') || request()->has('status_intervensi'))
-                    <a href="{{ $ewsIndexRoute }}" class="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition" title="Reset Filter">
+                @if(request()->hasAny(['semester', 'status_intervensi', 'dosen_pa_id', 'angkatan']))
+                    <a href="{{ $ewsIndexRoute }}?scope={{ $scope }}" class="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition" title="Reset Filter">
                         <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                     </a>
                 @endif
@@ -110,6 +153,7 @@
                     <tr class="text-slate-400 border-b border-slate-100">
                         <th class="pb-3 font-semibold w-24">NIM</th>
                         <th class="pb-3 font-semibold">Nama Mahasiswa</th>
+                        <th class="pb-3 font-semibold">Dosen PA</th>
                         <th class="pb-3 font-semibold">Semester</th>
                         <th class="pb-3 font-semibold">IPK / IPS</th>
                         <th class="pb-3 font-semibold">Kehadiran</th>
@@ -123,8 +167,24 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3 font-mono font-bold text-rose-700">{{ $akd->mahasiswa->nim }}</td>
                             <td class="py-3">
-                                <p class="font-bold text-slate-900">{{ $akd->mahasiswa->nama }}</p>
+                                <div class="flex items-center gap-1.5">
+                                    <p class="font-bold text-slate-900">{{ $akd->mahasiswa->nama }}</p>
+                                    @if(auth()->user()->isDosenPa() && $akd->mahasiswa->dosen_pa_id === auth()->id())
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0" title="Mahasiswa bimbingan Anda">
+                                            <i data-lucide="star" class="w-2.5 h-2.5 mr-0.5 fill-amber-400"></i> Bimbingan Anda
+                                        </span>
+                                    @endif
+                                </div>
                                 <p class="text-[10px] text-slate-400">Angkatan {{ $akd->mahasiswa->angkatan ?? '-' }}</p>
+                            </td>
+                            <td class="py-3">
+                                @if($akd->mahasiswa->dosenPa)
+                                    <span class="text-slate-700 font-medium text-[11px] block truncate max-w-[130px]" title="{{ $akd->mahasiswa->dosenPa->name }}">
+                                        {{ $akd->mahasiswa->dosenPa->name }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 italic text-[10px]">Belum diatur</span>
+                                @endif
                             </td>
                             <td class="py-3 text-slate-700 font-medium">Semester {{ $akd->semester }}</td>
                             <td class="py-3">
@@ -195,7 +255,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-8 text-center text-slate-400">Tidak ada mahasiswa yang memenuhi kriteria peringatan dini pada filter ini.</td>
+                            <td colspan="9" class="py-8 text-center text-slate-400">Tidak ada mahasiswa yang memenuhi kriteria peringatan dini pada filter ini.</td>
                         </tr>
                     @endforelse
                 </tbody>

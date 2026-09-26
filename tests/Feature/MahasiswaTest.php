@@ -61,4 +61,29 @@ class MahasiswaTest extends TestCase
         $updateResponse->assertRedirect(route('admin.mahasiswa.index'));
         $this->assertDatabaseHas('mahasiswas', ['nama' => 'Pingky Hera Veliyanti (Updated)']);
     }
+
+    public function test_admin_can_assign_dosen_pa_to_mahasiswa(): void
+    {
+        $dosenPa = User::where('role', 'dosen_pa')->first();
+        $this->assertNotNull($dosenPa);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.mahasiswa.store'), [
+            'nim' => '2271029998',
+            'nama' => 'Mahasiswa Bimbingan Test',
+            'dosen_pa_id' => $dosenPa->id,
+            'angkatan' => 2022,
+            'jenis_kelamin' => 'L',
+            'jalur_masuk' => 'SNBP',
+            'status_mahasiswa' => 'Aktif',
+        ]);
+
+        $response->assertRedirect(route('admin.mahasiswa.index'));
+        $this->assertDatabaseHas('mahasiswas', [
+            'nim' => '2271029998',
+            'dosen_pa_id' => $dosenPa->id,
+        ]);
+
+        $mhs = Mahasiswa::where('nim', '2271029998')->first();
+        $this->assertEquals($dosenPa->id, $mhs->dosenPa->id);
+    }
 }

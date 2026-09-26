@@ -73,6 +73,7 @@ class DashboardController extends Controller
      */
     public function prodiDashboard()
     {
+        $user = Auth::user();
         $totalMahasiswa = Mahasiswa::count();
         $activeModel = C45Model::active()->first();
         $totalPrediksi = Prediksi::count();
@@ -82,8 +83,30 @@ class DashboardController extends Controller
         $totalRisikoSedang = DataAkademik::where('label_risiko_aktual', 'Risiko Sedang')->count();
         $totalRisikoTinggi = DataAkademik::where('label_risiko_aktual', 'Risiko Tinggi')->count();
 
+        // Advisee specific metrics for Dosen PA
+        $myBimbinganTotal = 0;
+        $myBimbinganHighRisk = 0;
+        $myBimbinganPendingIntervention = 0;
+
+        if ($user->isDosenPa()) {
+            $myBimbinganTotal = Mahasiswa::where('dosen_pa_id', $user->id)->count();
+            $myBimbinganHighRisk = DataAkademik::whereHas('mahasiswa', fn($q) => $q->where('dosen_pa_id', $user->id))
+                ->where('label_risiko_aktual', 'Risiko Tinggi')
+                ->count();
+            $myBimbinganPendingIntervention = DataAkademik::whereHas('mahasiswa', fn($q) => $q->where('dosen_pa_id', $user->id))
+                ->where(function($q) {
+                    $q->where('label_risiko_aktual', 'Risiko Tinggi')
+                      ->orWhere('ipk', '<', 2.75)
+                      ->orWhere('persentase_kehadiran', '<', 75.0);
+                })
+                ->where(function($q) {
+                    $q->whereNull('status_intervensi')
+                      ->orWhere('status_intervensi', 'Belum Ditindaklanjuti');
+                })->count();
+        }
+
         // High-risk students requiring immediate attention
-        $highRiskStudents = DataAkademik::with('mahasiswa')
+        $highRiskStudents = DataAkademik::with(['mahasiswa.dosenPa'])
             ->where('label_risiko_aktual', 'Risiko Tinggi')
             ->latest()
             ->take(10)
@@ -96,7 +119,10 @@ class DashboardController extends Controller
             'totalRisikoRendah',
             'totalRisikoSedang',
             'totalRisikoTinggi',
-            'highRiskStudents'
+            'highRiskStudents',
+            'myBimbinganTotal',
+            'myBimbinganHighRisk',
+            'myBimbinganPendingIntervention'
         ));
     }
 
