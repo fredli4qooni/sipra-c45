@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-950">
+<html lang="id" class="h-full bg-[#f8fafc]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,15 +49,6 @@
                             900: '#064e3b',
                             950: '#022c22',
                         }
-                    },
-                    keyframes: {
-                        pulseSlow: {
-                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
-                            '50%': { opacity: '0.8', transform: 'scale(1.05)' },
-                        }
-                    },
-                    animation: {
-                        'pulse-slow': 'pulseSlow 6s ease-in-out infinite',
                     }
                 }
             }
@@ -70,6 +61,7 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #0f172a;
         }
         h1, h2, h3, h4, h5, h6, .font-heading, .font-display {
             font-family: 'Outfit', sans-serif;
@@ -77,7 +69,7 @@
         }
     </style>
 </head>
-<body class="min-h-full bg-slate-900 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+<body class="min-h-full bg-[#f8fafc] text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-900 flex flex-col justify-between p-4 sm:p-6 lg:p-8">
 
     @yield('content')
 
