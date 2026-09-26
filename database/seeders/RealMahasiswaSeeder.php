@@ -129,8 +129,9 @@ class RealMahasiswaSeeder extends Seeder
                 ]);
                 $totalMahasiswa++;
 
-                // 3. Rekam Akademik Riil & Variabel Prediktor
+                // 3. Rekam Akademik Riil & Variabel Prediktor Multi-Level
                 $isCuti = ($status === 'Cuti' || $ipk <= 0);
+                $hash = abs(crc32($rawNim));
 
                 if ($isCuti) {
                     $ips = 0.00;
@@ -138,32 +139,55 @@ class RealMahasiswaSeeder extends Seeder
                     $sksTidakLulus = rand(4, 10);
                     $kehadiran = 0.00;
                     $labelRisiko = 'Risiko Tinggi';
-                } elseif ($ipk < 2.75) {
-                    $ips = round(min(3.00, max(1.20, $ipk - (rand(0, 20) / 100))), 2);
-                    $sksSemester = rand(12, 16);
-                    $sksTidakLulus = rand(2, 6);
-                    $kehadiran = round(rand(55, 74) + (rand(0, 99) / 100), 2);
-                    $labelRisiko = 'Risiko Tinggi';
-                } elseif ($ipk < 3.50) {
-                    $ips = round(min(3.60, max(2.60, $ipk + (rand(-15, 10) / 100))), 2);
-                    $sksSemester = rand(17, 20);
-                    $sksTidakLulus = (rand(0, 10) > 5) ? 2 : 0;
-                    $kehadiran = round(rand(76, 84) + (rand(0, 99) / 100), 2);
-                    $labelRisiko = 'Risiko Sedang';
                 } else {
-                    // IPK >= 3.50 (Sebagian kecil dengan absensi cukup masuk risiko sedang)
-                    if ($ipk < 3.58 && (abs(crc32($rawNim)) % 3 === 0)) {
-                        $ips = round(min(3.55, max(2.90, $ipk - 0.15)), 2);
-                        $sksSemester = 19;
-                        $sksTidakLulus = 2;
-                        $kehadiran = round(rand(77, 84) + (rand(0, 99) / 100), 2);
-                        $labelRisiko = 'Risiko Sedang';
+                    // Mahasiswa Aktif
+                    if ($ipk < 2.75) {
+                        // IPK Rendah
+                        $ips = round(min(3.00, max(1.20, $ipk + (($hash % 20 - 10) / 100))), 2);
+                        $sksSemester = 14 + ($hash % 5);
+                        if ($hash % 4 === 0) {
+                            $kehadiran = 86.0 + ($hash % 8); // Baik
+                            $sksTidakLulus = 0;
+                            $labelRisiko = 'Risiko Sedang';
+                        } else {
+                            $kehadiran = 60.0 + ($hash % 15); // Kurang
+                            $sksTidakLulus = 2 + ($hash % 4);
+                            $labelRisiko = 'Risiko Tinggi';
+                        }
+                    } elseif ($ipk <= 3.25) {
+                        // IPK Cukup (2.75 - 3.25)
+                        $ips = round(min(3.50, max(2.60, $ipk + (($hash % 20 - 10) / 100))), 2);
+                        $sksSemester = 18 + ($hash % 4);
+                        if ($hash % 3 === 0) {
+                            $kehadiran = 68.0 + ($hash % 6); // Kurang
+                            $sksTidakLulus = 2;
+                            $labelRisiko = 'Risiko Tinggi';
+                        } elseif ($hash % 3 === 1) {
+                            $kehadiran = 76.0 + ($hash % 8); // Cukup
+                            $sksTidakLulus = 2;
+                            $labelRisiko = 'Risiko Sedang';
+                        } else {
+                            $kehadiran = 86.0 + ($hash % 8); // Baik
+                            $sksTidakLulus = 0;
+                            $labelRisiko = 'Risiko Rendah';
+                        }
                     } else {
-                        $ips = round(min(4.00, max(3.20, $ipk + (rand(-10, 10) / 100))), 2);
-                        $sksSemester = rand(21, 24);
-                        $sksTidakLulus = 0;
-                        $kehadiran = round(rand(86, 98) + (rand(0, 99) / 100), 2);
-                        $labelRisiko = 'Risiko Rendah';
+                        // IPK Tinggi (> 3.25)
+                        $ips = round(min(4.00, max(3.10, $ipk + (($hash % 20 - 10) / 100))), 2);
+                        $sksSemester = 21 + ($hash % 4);
+                        if ($hash % 12 === 0) {
+                            $kehadiran = 70.0 + ($hash % 4); // Kurang
+                            $sksTidakLulus = 2;
+                            $labelRisiko = 'Risiko Sedang';
+                        } elseif ($hash % 8 === 0) {
+                            $kehadiran = 77.0 + ($hash % 7); // Cukup
+                            $sksTidakLulus = 0;
+                            $labelRisiko = 'Risiko Sedang';
+                        } else {
+                            $kehadiran = 87.0 + ($hash % 11); // Baik
+                            $sksTidakLulus = 0;
+                            $labelRisiko = 'Risiko Rendah';
+                        }
                     }
                 }
 

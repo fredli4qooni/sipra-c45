@@ -37,11 +37,10 @@ class C45ModelSeeder extends Seeder
         if (count($records) >= 5) {
             $engine = new C45EngineService();
             $features = [
-                'kategori_ipk',
-                'kategori_ips',
-                'kategori_sks',
-                'kategori_kehadiran',
                 'status_cuti',
+                'kategori_ipk',
+                'kategori_kehadiran',
+                'kategori_sks',
                 'sks_tidak_lulus',
             ];
 
