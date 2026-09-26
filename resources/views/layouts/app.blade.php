@@ -103,50 +103,57 @@
         <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200/80 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 -translate-x-full">
             
             <!-- Top Section: User Profile Card (Matching Reference Design) -->
-            <div class="p-4 border-b border-slate-100">
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 hover:border-slate-300 transition space-y-3">
+            <div class="p-3.5 border-b border-slate-100">
+                <div class="p-3 rounded-xl bg-slate-50/90 border border-slate-200/80 hover:border-slate-300 transition space-y-2.5">
                     
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3 min-w-0">
-                            <!-- Avatar (Photo or Initials) -->
+                    <div class="flex items-center space-x-3">
+                        <!-- Avatar (Photo or Initials) with status indicator -->
+                        <div class="relative flex-shrink-0">
                             @if(auth()->user()->avatar_url)
-                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-xs flex-shrink-0">
+                                <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-xs">
                             @else
-                                <div class="w-10 h-10 rounded-lg bg-brand-600 text-white font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0">
+                                <div class="w-10 h-10 rounded-lg bg-brand-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
                                     {{ auth()->user()->initials }}
                                 </div>
                             @endif
-                            <div class="min-w-0 flex-1">
-                                <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
-                                <p class="text-[11px] text-slate-500 truncate font-mono">
+                            <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" title="Online"></span>
+                        </div>
+
+                        <!-- User Info: Name & Role Badge / NIP -->
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-bold text-slate-900 truncate leading-snug" title="{{ auth()->user()->name }}">
+                                {{ auth()->user()->name }}
+                            </p>
+                            <div class="flex items-center space-x-1.5 mt-0.5">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider whitespace-nowrap flex-shrink-0
+                                    @if(auth()->user()->isAdmin()) bg-purple-100 text-purple-700 border border-purple-200/80
+                                    @elseif(auth()->user()->isProdi()) bg-blue-100 text-blue-700 border border-blue-200/80
+                                    @elseif(auth()->user()->isDosenPa()) bg-amber-100 text-amber-800 border border-amber-200/80
+                                    @else bg-emerald-100 text-emerald-800 border border-emerald-200/80
+                                    @endif">
+                                    {{ auth()->user()->role_short_label }}
+                                </span>
+                                <span class="text-[11px] text-slate-400 font-mono truncate" title="{{ auth()->user()->nim_nip ?? auth()->user()->email }}">
                                     {{ auth()->user()->nim_nip ?? auth()->user()->email }}
-                                </p>
+                                </span>
                             </div>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider
-                            @if(auth()->user()->isAdmin()) bg-purple-50 text-purple-700 border border-purple-200/60
-                            @elseif(auth()->user()->isProdi()) bg-blue-50 text-blue-700 border border-blue-200/60
-                            @elseif(auth()->user()->isDosenPa()) bg-amber-50 text-amber-700 border border-amber-200/60
-                            @else bg-brand-50 text-brand-700 border border-brand-200/60
-                            @endif">
-                            {{ auth()->user()->role_label }}
-                        </span>
                     </div>
 
-                    <!-- Quick Action Mini Pills (Profile, Bantuan, Logout) -->
-                    <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-200/60">
-                        <a href="{{ route('profile.edit') }}" class="flex flex-col items-center justify-center p-1.5 rounded-lg bg-white hover:bg-slate-100/80 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[10px] font-semibold transition">
-                            <i data-lucide="user" class="w-3.5 h-3.5 mb-0.5 text-slate-500"></i>
+                    <!-- Quick Action Buttons (Profile, Bantuan, Logout) -->
+                    <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-200/70">
+                        <a href="{{ route('profile.edit') }}" class="group flex items-center justify-center space-x-1 py-1.5 px-1 rounded-lg bg-white hover:bg-slate-100/90 border border-slate-200/80 text-slate-600 hover:text-slate-900 text-[11px] font-medium transition shadow-2xs" title="Kelola Profil">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600"></i>
                             <span>Profil</span>
                         </a>
-                        <a href="{{ route('bantuan') }}" class="flex flex-col items-center justify-center p-1.5 rounded-lg bg-white hover:bg-slate-100/80 border border-slate-200/60 text-slate-600 hover:text-slate-900 text-[10px] font-semibold transition">
-                            <i data-lucide="help-circle" class="w-3.5 h-3.5 mb-0.5 text-slate-500"></i>
+                        <a href="{{ route('bantuan') }}" class="group flex items-center justify-center space-x-1 py-1.5 px-1 rounded-lg bg-white hover:bg-slate-100/90 border border-slate-200/80 text-slate-600 hover:text-slate-900 text-[11px] font-medium transition shadow-2xs" title="Pusat Bantuan">
+                            <i data-lucide="help-circle" class="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600"></i>
                             <span>Bantuan</span>
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
                             @csrf
-                            <button type="submit" class="w-full h-full flex flex-col items-center justify-center p-1.5 rounded-lg bg-white hover:bg-rose-50 border border-slate-200/60 text-slate-600 hover:text-rose-600 text-[10px] font-semibold transition">
-                                <i data-lucide="log-out" class="w-3.5 h-3.5 mb-0.5 text-slate-500 group-hover:text-rose-500"></i>
+                            <button type="submit" class="group w-full flex items-center justify-center space-x-1 py-1.5 px-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200/80 hover:border-rose-200 text-slate-600 hover:text-rose-600 text-[11px] font-medium transition shadow-2xs" title="Keluar dari Sistem">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5 text-slate-400 group-hover:text-rose-600"></i>
                                 <span>Keluar</span>
                             </button>
                         </form>

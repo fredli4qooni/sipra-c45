@@ -88,6 +88,17 @@ class User extends Authenticatable
         };
     }
 
+    public function getRoleShortLabelAttribute(): string
+    {
+        return match($this->role) {
+            'admin' => 'Admin',
+            'prodi' => 'Kaprodi',
+            'dosen_pa' => 'Dosen PA',
+            'mahasiswa' => 'Mahasiswa',
+            default => ucfirst($this->role ?? 'User'),
+        };
+    }
+
     public function getAvatarUrlAttribute(): ?string
     {
         if ($this->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->avatar)) {
