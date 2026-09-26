@@ -164,7 +164,18 @@ class PrediksiController extends Controller
     public function show(Prediksi $prediksi)
     {
         $prediksi->load(['mahasiswa', 'model', 'rule', 'creator']);
-        return view('prediksi.show', compact('prediksi'));
+
+        $treeArray = [];
+        if ($prediksi->model && !empty($prediksi->model->tree_structure_json)) {
+            $treeArray = is_array($prediksi->model->tree_structure_json)
+                ? $prediksi->model->tree_structure_json
+                : (json_decode($prediksi->model->tree_structure_json, true) ?? []);
+        }
+
+        $inputParams = $prediksi->input_params_json ?? [];
+        $decisionTrace = C45EngineService::traceDecisionPath($treeArray, $inputParams);
+
+        return view('prediksi.show', compact('prediksi', 'decisionTrace'));
     }
 
     /**

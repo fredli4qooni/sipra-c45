@@ -260,6 +260,149 @@ class C45EngineService
     }
 
     /**
+     * Human readable Indonesian label for C4.5 attributes
+     */
+    public static function getAttributeLabel(string $attr): string
+    {
+        return match ($attr) {
+            'kategori_ipk' => 'Indeks Prestasi Kumulatif (IPK)',
+            'kategori_ips' => 'Indeks Prestasi Semester (IPS)',
+            'kategori_sks' => 'Beban SKS Semester',
+            'kategori_kehadiran' => 'Tingkat Kehadiran Kuliah',
+            'status_cuti' => 'Status Cuti Akademik',
+            'sks_tidak_lulus' => 'Mata Kuliah Mengulang (SKS Tidak Lulus)',
+            'jenis_kelamin' => 'Jenis Kelamin',
+            'tinggal_dengan' => 'Tempat Tinggal Mahasiswa',
+            default => ucwords(str_replace('_', ' ', $attr)),
+        };
+    }
+
+    /**
+     * Trace step-by-step decision traversal path for Explainable AI (XAI)
+     */
+    public static function traceDecisionPath(array $tree, array $inputParams): array
+    {
+        if (empty($tree)) {
+            return [
+                'has_trace' => false,
+                'steps' => [],
+                'terminal' => null,
+                'rule_text' => null,
+                'narratives' => [],
+                'summary_explanation' => 'Struktur pohon keputusan tidak tersedia.',
+            ];
+        }
+
+        // Ensure all categorical values exist
+        $categories = [
+            'kategori_ipk' => $inputParams['kategori_ipk'] ?? (isset($inputParams['ipk']) ? DataPreprocessingService::categorizeIpk((float)$inputParams['ipk']) : null),
+            'kategori_ips' => $inputParams['kategori_ips'] ?? (isset($inputParams['ips']) ? DataPreprocessingService::categorizeIps((float)$inputParams['ips']) : null),
+            'kategori_sks' => $inputParams['kategori_sks'] ?? (isset($inputParams['sks_semester']) ? DataPreprocessingService::categorizeSks((int)$inputParams['sks_semester']) : null),
+            'kategori_kehadiran' => $inputParams['kategori_kehadiran'] ?? (isset($inputParams['persentase_kehadiran']) ? DataPreprocessingService::categorizeKehadiran((float)$inputParams['persentase_kehadiran']) : null),
+            'status_cuti' => isset($inputParams['status_cuti']) 
+                ? (($inputParams['status_cuti'] === true || $inputParams['status_cuti'] === 1 || $inputParams['status_cuti'] === 'Ya' || $inputParams['status_cuti'] === 'true') ? 'Ya' : 'Tidak') 
+                : 'Tidak',
+            'sks_tidak_lulus' => isset($inputParams['sks_tidak_lulus']) 
+                ? (((int)$inputParams['sks_tidak_lulus'] > 0 || $inputParams['sks_tidak_lulus'] === 'Ada') ? 'Ada' : 'Tidak Ada') 
+                : 'Tidak Ada',
+            'jenis_kelamin' => $inputParams['jenis_kelamin'] ?? null,
+            'tinggal_dengan' => $inputParams['tinggal_dengan'] ?? null,
+        ];
+
+        $steps = [];
+        $currentNode = $tree;
+        $depth = 1;
+        $conditionsText = [];
+        $narratives = [];
+
+        while ($currentNode && ($currentNode['type'] ?? '') !== 'leaf') {
+            $attr = $currentNode['attribute'] ?? null;
+            if (!$attr) break;
+
+            $chosenVal = $categories[$attr] ?? null;
+            $rawDisplay = match($attr) {
+                'kategori_ipk' => isset($inputParams['ipk']) ? "IPK " . number_format((float)$inputParams['ipk'], 2) : "Kategori " . $chosenVal,
+                'kategori_ips' => isset($inputParams['ips']) ? "IPS " . number_format((float)$inputParams['ips'], 2) : "Kategori " . $chosenVal,
+                'kategori_sks' => isset($inputParams['sks_semester']) ? $inputParams['sks_semester'] . " SKS" : "Kategori " . $chosenVal,
+                'kategori_kehadiran' => isset($inputParams['persentase_kehadiran']) ? number_format((float)$inputParams['persentase_kehadiran'], 1) . "% Kehadiran" : "Kategori " . $chosenVal,
+                'status_cuti' => ($chosenVal === 'Ya') ? 'Mahasiswa Mengajukan Cuti' : 'Mahasiswa Aktif Perkuliahan',
+                'sks_tidak_lulus' => isset($inputParams['sks_tidak_lulus']) && is_numeric($inputParams['sks_tidak_lulus']) ? $inputParams['sks_tidak_lulus'] . " SKS Mengulang" : "Status " . $chosenVal,
+                default => (string) $chosenVal,
+            };
+
+            $branches = $currentNode['branches'] ?? [];
+            $branchKeys = array_keys($branches);
+            $isFallback = false;
+            $nextNode = null;
+
+            if ($chosenVal !== null && isset($branches[$chosenVal])) {
+                $nextNode = $branches[$chosenVal];
+            } else {
+                // Unknown branch fallback: branch with highest samples
+                $maxSamples = -1;
+                foreach ($branches as $bKey => $bNode) {
+                    if (($bNode['samples_count'] ?? 0) > $maxSamples) {
+                        $maxSamples = $bNode['samples_count'] ?? 0;
+                        $nextNode = $bNode;
+                        $chosenVal = (string) $bKey;
+                        $isFallback = true;
+                    }
+                }
+            }
+
+            $attrLabel = self::getAttributeLabel($attr);
+            $conditionsText[] = "{$attrLabel} = '{$chosenVal}'";
+            $narratives[] = "Simpul #" . $depth . " (" . ($depth === 1 ? 'Root Node' : 'Internal Node') . "): Algoritma memeriksa atribut <strong>{$attrLabel}</strong>. Nilai mahasiswa tergolong <strong>{$chosenVal}</strong> ({$rawDisplay}), mengarahkan alur ke cabang <em>{$chosenVal}</em>.";
+
+            $steps[] = [
+                'step' => $depth,
+                'depth' => $depth,
+                'type' => 'node',
+                'attribute' => $attr,
+                'attribute_label' => $attrLabel,
+                'category_value' => $chosenVal,
+                'raw_value' => $rawDisplay,
+                'available_branches' => $branchKeys,
+                'is_fallback' => $isFallback,
+                'gain_ratio' => $currentNode['gain_ratio'] ?? null,
+                'samples_count' => $currentNode['samples_count'] ?? null,
+                'distribution' => $currentNode['distribution'] ?? [],
+            ];
+
+            $currentNode = $nextNode;
+            $depth++;
+
+            if ($depth > 15) break; // safety guard
+        }
+
+        $terminal = null;
+        if ($currentNode && ($currentNode['type'] ?? '') === 'leaf') {
+            $terminal = [
+                'step' => $depth,
+                'depth' => $depth,
+                'type' => 'leaf',
+                'decision' => $currentNode['decision'] ?? 'Risiko Sedang',
+                'confidence' => $currentNode['confidence'] ?? 0.0,
+                'samples_count' => $currentNode['samples_count'] ?? 0,
+                'distribution' => $currentNode['distribution'] ?? [],
+            ];
+            $narratives[] = "Simpul Daun (Terminal Leaf): Alur berakhir pada daun keputusan <strong>{$terminal['decision']}</strong> dengan tingkat keyakinan (confidence) <strong>{$terminal['confidence']}%</strong>, didukung oleh <strong>{$terminal['samples_count']} data sampel latih</strong>.";
+        }
+
+        $ruleText = !empty($conditionsText)
+            ? "IF " . implode(" AND ", $conditionsText) . " THEN Keputusan = " . ($terminal['decision'] ?? 'Risiko Sedang')
+            : null;
+
+        return [
+            'has_trace' => !empty($steps) && $terminal !== null,
+            'steps' => $steps,
+            'terminal' => $terminal,
+            'rule_text' => $ruleText,
+            'narratives' => $narratives,
+        ];
+    }
+
+    /**
      * Classify an input instance using Decision Tree
      */
     public static function predictWithTree(array $tree, array $instance): array

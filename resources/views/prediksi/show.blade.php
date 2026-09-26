@@ -130,6 +130,154 @@
             </div>
         @endif
 
+        <!-- Explainable AI (XAI): Decision Path Trace Section -->
+        @if(isset($decisionTrace) && ($decisionTrace['has_trace'] ?? false))
+            <div class="p-6 rounded-xl bg-slate-50/80 border border-slate-200/90 space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="git-branch" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Penelusuran Jalur Pohon Keputusan (Explainable AI - XAI)</h5>
+                            <p class="text-[11px] text-slate-500">Transparansi inferensi logika pohon C4.5 dari Root hingga Leaf Node</p>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 self-start sm:self-auto">
+                        <i data-lucide="route" class="w-3 h-3 mr-1"></i>
+                        {{ count($decisionTrace['steps']) }} Simpul Dilalui
+                    </span>
+                </div>
+
+                <!-- Stepper Flow -->
+                <div class="relative pl-6 space-y-6 before:absolute before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
+                    @foreach($decisionTrace['steps'] as $idx => $step)
+                        <div class="relative">
+                            <!-- Step Dot -->
+                            <div class="absolute -left-6 top-1 w-6 h-6 rounded-full bg-white border-2 border-purple-600 flex items-center justify-center text-[10px] font-bold text-purple-700 shadow-xs">
+                                {{ $step['step'] }}
+                            </div>
+
+                            <div class="p-4 rounded-lg bg-white border border-slate-200 shadow-2xs space-y-2.5">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase {{ $step['step'] === 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-purple-100 text-purple-800 border border-purple-200' }}">
+                                            {{ $step['step'] === 1 ? 'Root Node' : 'Internal Node' }}
+                                        </span>
+                                        <h6 class="text-xs font-bold text-slate-900">{{ $step['attribute_label'] }}</h6>
+                                    </div>
+                                    <div class="flex items-center space-x-2 text-[10px] text-slate-500">
+                                        @if($step['gain_ratio'] !== null)
+                                            <span class="px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-mono">Gain Ratio: {{ number_format($step['gain_ratio'], 4) }}</span>
+                                        @endif
+                                        <span>{{ $step['samples_count'] ?? 0 }} Sampel</span>
+                                    </div>
+                                </div>
+
+                                <!-- Evaluation and Branching details -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                    <div class="p-2.5 rounded-lg bg-purple-50/60 border border-purple-100">
+                                        <p class="text-[10px] text-purple-700 font-medium">Nilai Mahasiswa Terdeteksi:</p>
+                                        <p class="text-xs font-bold text-purple-950 mt-0.5">
+                                            {{ $step['raw_value'] }}
+                                            <span class="font-normal text-purple-700">({{ $step['category_value'] }})</span>
+                                        </p>
+                                    </div>
+                                    <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                        <p class="text-[10px] text-slate-500 font-medium">Pilihan Cabang Simpul:</p>
+                                        <div class="flex flex-wrap gap-1 mt-1">
+                                            @foreach($step['available_branches'] as $b)
+                                                @php $isChosen = ($b === $step['category_value']); @endphp
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold {{ $isChosen ? 'bg-purple-600 text-white shadow-2xs' : 'bg-white text-slate-500 border border-slate-200 opacity-60' }}">
+                                                    @if($isChosen)<i data-lucide="check" class="w-3 h-3 mr-0.5"></i>@endif
+                                                    {{ $b }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if(!empty($step['distribution']))
+                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                                        <span>Distribusi Kelas di Simpul Ini:</span>
+                                        <div class="flex items-center space-x-2">
+                                            @foreach($step['distribution'] as $cls => $cnt)
+                                                <span class="font-medium font-mono
+                                                    @if($cls === 'Risiko Rendah') text-brand-700
+                                                    @elseif($cls === 'Risiko Sedang') text-amber-700
+                                                    @else text-rose-700 @endif">
+                                                    {{ $cls }}: <strong>{{ $cnt }}</strong>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <!-- Terminal Leaf Node in Stepper -->
+                    @if(isset($decisionTrace['terminal']))
+                        @php
+                            $term = $decisionTrace['terminal'];
+                            $termBg = match($term['decision']) {
+                                'Risiko Rendah' => 'bg-brand-50 border-brand-300 text-brand-900',
+                                'Risiko Sedang' => 'bg-amber-50 border-amber-300 text-amber-900',
+                                default => 'bg-rose-50 border-rose-300 text-rose-900',
+                            };
+                            $termIcon = match($term['decision']) {
+                                'Risiko Rendah' => 'shield-check',
+                                'Risiko Sedang' => 'alert-triangle',
+                                default => 'alert-circle',
+                            };
+                        @endphp
+                        <div class="relative">
+                            <div class="absolute -left-6 top-1 w-6 h-6 rounded-full bg-white border-2 border-brand-600 flex items-center justify-center text-[10px] font-bold text-brand-700 shadow-xs">
+                                <i data-lucide="flag" class="w-3 h-3 text-brand-600"></i>
+                            </div>
+
+                            <div class="p-4 rounded-lg border {{ $termBg }} shadow-2xs space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase bg-white/80 border border-current shadow-2xs">
+                                        Terminal Leaf Node (Daun Keputusan)
+                                    </span>
+                                    <span class="text-[10px] font-bold">Keyakinan (Confidence): {{ $term['confidence'] }}%</span>
+                                </div>
+                                <div class="flex items-center space-x-3 pt-1">
+                                    <div class="w-9 h-9 rounded-lg bg-white/80 border border-current flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="{{ $termIcon }}" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold opacity-80">Klasifikasi Akhir</p>
+                                        <h6 class="text-base font-black">{{ $term['decision'] }}</h6>
+                                    </div>
+                                    <div class="ml-auto text-right text-xs">
+                                        <p class="text-[10px] opacity-80">Didukung Oleh</p>
+                                        <p class="font-bold">{{ $term['samples_count'] }} Data Sampel Latih</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Academic Inference Narrative Box -->
+                @if(!empty($decisionTrace['narratives']))
+                    <div class="p-4 rounded-lg bg-white border border-slate-200 space-y-2 text-xs">
+                        <div class="flex items-center space-x-2 text-slate-800 font-bold">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5 text-brand-600"></i>
+                            <span>Narasi Logika Inferensi (Explainable AI - XAI Narrative):</span>
+                        </div>
+                        <ol class="list-decimal pl-5 space-y-1.5 text-slate-600 leading-relaxed text-[11px]">
+                            @foreach($decisionTrace['narratives'] as $nar)
+                                <li>{!! $nar !!}</li>
+                            @endforeach
+                        </ol>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         <!-- Proactive Academic Intervention Recommendation Box -->
         <div class="p-5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
             <div class="flex items-center space-x-2">
