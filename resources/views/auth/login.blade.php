@@ -5,7 +5,7 @@
 @section('content')
 <div class="w-full max-w-md mx-auto my-auto space-y-6">
 
-    <!-- Top Branding & Institutional Header -->
+    <!-- Top Branding Header -->
     <div class="text-center space-y-2">
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white border border-slate-200/90 shadow-2xs text-brand-600 mb-1">
             <i data-lucide="brain-circuit" class="w-6 h-6"></i>
@@ -19,10 +19,6 @@
                 Portal Prediksi Akademik Mahasiswa Berbasis Decision Tree C4.5
             </p>
         </div>
-        <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[11px] text-slate-600 font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-brand-600"></span>
-            <span>UIN Raden Intan Lampung • FST</span>
-        </div>
     </div>
 
     <!-- Main Login Card -->
@@ -33,77 +29,9 @@
                 <h2 class="text-base font-bold text-slate-900 font-heading">Masuk ke Akun</h2>
                 <p class="text-xs text-slate-500">Gunakan Email, NPM, atau NIP terdaftar</p>
             </div>
-            <button type="button" onclick="openHelpModal()" class="text-slate-400 hover:text-brand-700 p-1.5 rounded-lg hover:bg-slate-50 transition" title="Pusat Bantuan">
+            <button type="button" onclick="openHelpModal()" class="text-slate-400 hover:text-brand-700 p-1.5 rounded-lg hover:bg-slate-50 transition cursor-pointer" title="Pusat Bantuan">
                 <i data-lucide="help-circle" class="w-4 h-4"></i>
             </button>
-        </div>
-
-        <!-- Dynamic Demo Notification Toast -->
-        <div id="demo-toast" class="hidden items-center justify-between p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs transition-all shadow-2xs">
-            <div class="flex items-center space-x-2">
-                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
-                <span id="demo-toast-text" class="font-semibold">Kredensial demo terisi otomatis!</span>
-            </div>
-            <button type="button" onclick="document.getElementById('demo-toast').classList.add('hidden')" class="text-emerald-600 hover:text-emerald-900">
-                <i data-lucide="x" class="w-3.5 h-3.5"></i>
-            </button>
-        </div>
-
-        <!-- 1-Click Quick Demo Account Selector (Minimalist Style) -->
-        <div class="p-3 rounded-lg bg-slate-50/80 border border-slate-200/70 space-y-2">
-            <div class="flex items-center justify-between text-[11px]">
-                <span class="font-bold text-slate-700 flex items-center space-x-1.5">
-                    <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i>
-                    <span>Akun Demo Cepat</span>
-                </span>
-                <span class="text-[10px] text-slate-400">1-Klik Isi Form</span>
-            </div>
-
-            <div class="grid grid-cols-4 gap-1.5">
-                <!-- Admin -->
-                <button 
-                    type="button" 
-                    onclick="fillDemoAccount('admin')" 
-                    id="demo-pill-admin"
-                    class="demo-pill py-1.5 px-1 rounded-md bg-white hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 text-slate-700 text-[11px] font-semibold text-center transition shadow-2xs cursor-pointer"
-                    title="Masuk sebagai Administrator"
-                >
-                    Admin
-                </button>
-
-                <!-- Kaprodi -->
-                <button 
-                    type="button" 
-                    onclick="fillDemoAccount('kaprodi')" 
-                    id="demo-pill-kaprodi"
-                    class="demo-pill py-1.5 px-1 rounded-md bg-white hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 text-slate-700 text-[11px] font-semibold text-center transition shadow-2xs cursor-pointer"
-                    title="Masuk sebagai Ketua Program Studi"
-                >
-                    Kaprodi
-                </button>
-
-                <!-- Dosen PA -->
-                <button 
-                    type="button" 
-                    onclick="fillDemoAccount('dosen_pa')" 
-                    id="demo-pill-dosen_pa"
-                    class="demo-pill py-1.5 px-1 rounded-md bg-white hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 text-slate-700 text-[11px] font-semibold text-center transition shadow-2xs cursor-pointer"
-                    title="Masuk sebagai Dosen PA"
-                >
-                    Dosen PA
-                </button>
-
-                <!-- Mahasiswa -->
-                <button 
-                    type="button" 
-                    onclick="fillDemoAccount('mahasiswa')" 
-                    id="demo-pill-mahasiswa"
-                    class="demo-pill py-1.5 px-1 rounded-md bg-white hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 text-slate-700 text-[11px] font-semibold text-center transition shadow-2xs cursor-pointer"
-                    title="Masuk sebagai Mahasiswa (2271020052)"
-                >
-                    Mahasiswa
-                </button>
-            </div>
         </div>
 
         <!-- Flash Server Alerts -->
@@ -141,7 +69,7 @@
                         value="{{ old('login_identifier') }}" 
                         required 
                         autofocus
-                        placeholder="contoh: admin@uinril.ac.id atau 2271020052"
+                        placeholder="contoh: dosen@uinril.ac.id atau 2271020052"
                         class="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 hover:bg-white focus:bg-white border @error('login_identifier') border-rose-300 bg-rose-50/30 @else border-slate-200 @enderror rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition shadow-2xs"
                     >
                 </div>
@@ -284,53 +212,6 @@
 </div>
 
 <script>
-    // Demo account definitions
-    const demoAccounts = {
-        admin: { id: 'admin@uinril.ac.id', pass: 'admin123', label: 'Administrator' },
-        kaprodi: { id: 'kaprodi@uinril.ac.id', pass: 'prodi123', label: 'Ketua Prodi' },
-        dosen_pa: { id: 'dosenpa@uinril.ac.id', pass: 'dosen123', label: 'Dosen PA' },
-        mahasiswa: { id: '2271020052', pass: 'password', label: 'Mahasiswa (Pingky)' }
-    };
-
-    function fillDemoAccount(role) {
-        const acc = demoAccounts[role];
-        if (!acc) return;
-
-        const idInput = document.getElementById('login_identifier');
-        const passInput = document.getElementById('password');
-
-        idInput.value = acc.id;
-        passInput.value = acc.pass;
-
-        // Reset all pills
-        document.querySelectorAll('.demo-pill').forEach(pill => {
-            pill.classList.remove('bg-brand-50', 'border-brand-500', 'text-brand-800', 'ring-2', 'ring-brand-500/20');
-            pill.classList.add('bg-white', 'border-slate-200', 'text-slate-700');
-        });
-
-        // Highlight selected pill
-        const activePill = document.getElementById('demo-pill-' + role);
-        if (activePill) {
-            activePill.classList.remove('bg-white', 'border-slate-200', 'text-slate-700');
-            activePill.classList.add('bg-brand-50', 'border-brand-500', 'text-brand-800', 'ring-2', 'ring-brand-500/20');
-        }
-
-        // Show toast
-        const toast = document.getElementById('demo-toast');
-        const toastText = document.getElementById('demo-toast-text');
-        if (toast && toastText) {
-            toastText.textContent = `Kredensial ${acc.label} terisi otomatis!`;
-            toast.classList.remove('hidden');
-            toast.classList.add('flex');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('flex');
-            }, 3000);
-        }
-
-        passInput.focus();
-    }
-
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('password');
         const eyeIcon = document.getElementById('passwordEyeIcon');
