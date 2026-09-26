@@ -7,7 +7,7 @@
 <div class="space-y-6">
 
     @if(!$mahasiswa)
-        <div class="p-6 rounded-3xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center space-x-3">
+        <div class="p-6 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center space-x-3">
             <i data-lucide="alert-triangle" class="w-6 h-6 flex-shrink-0 text-amber-600"></i>
             <div>
                 <h4 class="font-bold">Data Mahasiswa Belum Ditautkan</h4>

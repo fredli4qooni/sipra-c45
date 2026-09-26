@@ -24,7 +24,7 @@
                 </form>
             @endif
 
-            <a href="{{ auth()->user()->isAdmin() ? route('admin.tree.show', ['c45' => $c45->id]) : route('prodi.tree.show', ['c45' => $c45->id]) }}" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center">
+            <a href="{{ auth()->user()->isAdmin() ? route('admin.tree.show', ['c45' => $c45->id]) : route('prodi.tree.show', ['c45' => $c45->id]) }}" class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition flex items-center">
                 <i data-lucide="git-merge" class="w-3.5 h-3.5 mr-1.5 text-brand-600"></i>
                 Buka Pohon Visual
             </a>
@@ -32,16 +32,16 @@
     </div>
 
     <!-- Model Header Card -->
-    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div class="bg-white p-6 sm:p-8 rounded-xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="space-y-2">
             <div class="flex items-center space-x-2">
                 @if($c45->is_active)
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-500 mr-1.5"></span>
                         Model Utama Aktif
                     </span>
                 @else
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-600">
                         Arsip Model
                     </span>
                 @endif
@@ -54,7 +54,7 @@
             </p>
         </div>
 
-        <div class="p-5 rounded-2xl bg-brand-50/70 border border-brand-200/80 text-center min-w-[150px]">
+        <div class="p-5 rounded-lg bg-brand-50/70 border border-brand-200/80 text-center min-w-[150px]">
             <p class="text-[10px] text-brand-700 uppercase font-bold tracking-wider">Akurasi Uji</p>
             <h4 class="text-3xl font-black text-brand-800 mt-0.5">{{ $c45->accuracy }}%</h4>
             <span class="text-[11px] text-brand-600 font-semibold">{{ count($c45->rules) }} Aturan Dihasilkan</span>
@@ -64,35 +64,35 @@
     <!-- Evaluation Metrics Ribbon Grid -->
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
         <!-- Akurasi -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-1">
+        <div class="bg-white p-4 rounded-lg border border-slate-200/80 shadow-xs text-center space-y-1">
             <p class="text-[10px] font-bold text-slate-500 uppercase">Akurasi (Accuracy)</p>
             <h5 class="text-xl font-black text-brand-700">{{ $c45->accuracy }}%</h5>
             <p class="text-[10px] text-slate-400">Ketepatan Total</p>
         </div>
 
         <!-- Presisi -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-1">
+        <div class="bg-white p-4 rounded-lg border border-slate-200/80 shadow-xs text-center space-y-1">
             <p class="text-[10px] font-bold text-slate-500 uppercase">Presisi (Precision)</p>
             <h5 class="text-xl font-black text-blue-700">{{ $c45->precision }}%</h5>
             <p class="text-[10px] text-slate-400">Rata-rata Kelas</p>
         </div>
 
         <!-- Recall -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-1">
+        <div class="bg-white p-4 rounded-lg border border-slate-200/80 shadow-xs text-center space-y-1">
             <p class="text-[10px] font-bold text-slate-500 uppercase">Recall (Sensitivitas)</p>
             <h5 class="text-xl font-black text-teal-700">{{ $c45->recall }}%</h5>
             <p class="text-[10px] text-slate-400">Identifikasi Risiko</p>
         </div>
 
         <!-- Spesifisitas -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-1">
+        <div class="bg-white p-4 rounded-lg border border-slate-200/80 shadow-xs text-center space-y-1">
             <p class="text-[10px] font-bold text-slate-500 uppercase">Spesifisitas</p>
             <h5 class="text-xl font-black text-amber-700">{{ $c45->specificity }}%</h5>
             <p class="text-[10px] text-slate-400">True Negative Rate</p>
         </div>
 
         <!-- F1-Score -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs text-center space-y-1 col-span-2 sm:col-span-1">
+        <div class="bg-white p-4 rounded-lg border border-slate-200/80 shadow-xs text-center space-y-1 col-span-2 sm:col-span-1">
             <p class="text-[10px] font-bold text-slate-500 uppercase">F1-Score</p>
             <h5 class="text-xl font-black text-purple-700">{{ $c45->f1_score }}%</h5>
             <p class="text-[10px] text-slate-400">Harmonic Mean</p>
@@ -100,7 +100,7 @@
     </div>
 
     <!-- Confusion Matrix Heatmap -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2.5">
                 <i data-lucide="grid" class="w-4 h-4 text-brand-600"></i>
@@ -171,7 +171,7 @@
     </div>
 
     <!-- Extracted IF-THEN Rules Table -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2.5">
                 <i data-lucide="list-tree" class="w-4 h-4 text-amber-600"></i>
@@ -206,7 +206,7 @@
                                 {!! $formatted !!}
                             </td>
                             <td class="py-3 font-sans">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold
                                     @if($rule->decision === 'Risiko Rendah') bg-brand-50 text-brand-700 border border-brand-200/60
                                     @elseif($rule->decision === 'Risiko Sedang') bg-amber-50 text-amber-700 border border-amber-200/60
                                     @else bg-rose-50 text-rose-700 border border-rose-200/60
@@ -228,7 +228,7 @@
     </div>
 
     <!-- Step-by-Step Mathematical Calculation Logs -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+    <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center space-x-2.5">
                 <i data-lucide="calculator" class="w-4 h-4 text-teal-600"></i>
@@ -241,7 +241,7 @@
 
         <div class="space-y-4">
             @forelse($calculationLogs as $idx => $step)
-                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
                         <div class="flex items-center space-x-2">
                             <span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-mono text-[10px] font-bold">Node #{{ $idx + 1 }} (Depth {{ $step['depth'] ?? 1 }})</span>
