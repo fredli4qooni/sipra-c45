@@ -1,0 +1,106 @@
+@extends('layouts.app')
+
+@section('title', 'Tambah Mahasiswa Baru')
+@section('subtitle', 'Entri data master identitas mahasiswa baru')
+
+@section('content')
+<div class="max-w-3xl mx-auto space-y-6">
+
+    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
+        
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Formulir Data Mahasiswa</h3>
+                    <p class="text-xs text-slate-500">Lengkapi seluruh kolom identitas di bawah ini</p>
+                </div>
+            </div>
+            <a href="{{ route('admin.mahasiswa.index') }}" class="px-3 py-1.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+                Kembali
+            </a>
+        </div>
+
+        <form method="POST" action="{{ route('admin.mahasiswa.store') }}" class="space-y-4">
+            @csrf
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- NIM -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Induk Mahasiswa (NIM) <span class="text-rose-500">*</span></label>
+                    <input type="text" name="nim" value="{{ old('nim') }}" required placeholder="contoh: 2271020052" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    @error('nim') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <!-- Nama -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Mahasiswa <span class="text-rose-500">*</span></label>
+                    <input type="text" name="nama" value="{{ old('nama') }}" required placeholder="Nama lengkap sesuai SIAKAD" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                    @error('nama') <p class="text-[11px] text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Angkatan -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tahun Angkatan <span class="text-rose-500">*</span></label>
+                    <input type="number" name="angkatan" value="{{ old('angkatan', 2022) }}" required min="2015" max="2030" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                </div>
+
+                <!-- Jenis Kelamin -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Kelamin <span class="text-rose-500">*</span></label>
+                    <select name="jenis_kelamin" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                        <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                        <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                    </select>
+                </div>
+
+                <!-- Jalur Masuk -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Jalur Masuk</label>
+                    <select name="jalur_masuk" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                        <option value="SPAN-PTKIN" {{ old('jalur_masuk') == 'SPAN-PTKIN' ? 'selected' : '' }}>SPAN-PTKIN</option>
+                        <option value="UM-PTKIN" {{ old('jalur_masuk') == 'UM-PTKIN' ? 'selected' : '' }}>UM-PTKIN</option>
+                        <option value="SNBP" {{ old('jalur_masuk') == 'SNBP' ? 'selected' : '' }}>SNBP</option>
+                        <option value="SNBT" {{ old('jalur_masuk') == 'SNBT' ? 'selected' : '' }}>SNBT</option>
+                        <option value="Mandiri" {{ old('jalur_masuk') == 'Mandiri' ? 'selected' : '' }}>Mandiri</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Status Mahasiswa -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status Mahasiswa <span class="text-rose-500">*</span></label>
+                    <select name="status_mahasiswa" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                        <option value="Aktif" {{ old('status_mahasiswa') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="Cuti" {{ old('status_mahasiswa') == 'Cuti' ? 'selected' : '' }}>Cuti</option>
+                        <option value="Lulus" {{ old('status_mahasiswa') == 'Lulus' ? 'selected' : '' }}>Lulus</option>
+                        <option value="Drop Out" {{ old('status_mahasiswa') == 'Drop Out' ? 'selected' : '' }}>Drop Out</option>
+                    </select>
+                </div>
+
+                <!-- Email Pribadi -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Mahasiswa</label>
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="mahasiswa@student.uinril.ac.id" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
+                </div>
+            </div>
+
+            <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-100">
+                <a href="{{ route('admin.mahasiswa.index') }}" class="px-4 py-2.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-500 shadow-xs transition flex items-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-1.5"></i>
+                    Simpan Mahasiswa
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+@endsection

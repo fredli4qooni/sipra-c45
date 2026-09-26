@@ -1,0 +1,439 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\C45Model;
+use App\Models\C45Rule;
+use App\Models\Mahasiswa;
+use App\Models\Prediksi;
+use App\Models\PrediksiBatch;
+use App\Services\C45EngineService;
+use App\Services\DataPreprocessingService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class PrediksiController extends Controller
+{
+    /**
+     * Display list of prediction history
+     */
+    public function index(Request $request)
+    {
+        $query = Prediksi::with(['mahasiswa', 'model', 'batch']);
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_mahasiswa', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%");
+            });
+        }
+
+        if ($risiko = $request->input('hasil_klasifikasi')) {
+            $query->where('hasil_klasifikasi', $risiko);
+        }
+
+        if ($batchId = $request->input('batch_id')) {
+            $query->where('batch_id', $batchId);
+        }
+
+        $prediksis = $query->latest()->paginate(10)->withQueryString();
+        $batches = PrediksiBatch::latest()->take(10)->get();
+
+        // Statistics
+        $totalPrediksi = Prediksi::count();
+        $totalRendah = Prediksi::where('hasil_klasifikasi', 'Risiko Rendah')->count();
+        $totalSedang = Prediksi::where('hasil_klasifikasi', 'Risiko Sedang')->count();
+        $totalTinggi = Prediksi::where('hasil_klasifikasi', 'Risiko Tinggi')->count();
+        $activeModel = C45Model::active()->first();
+
+        return view('prediksi.index', compact(
+            'prediksis',
+            'batches',
+            'totalPrediksi',
+            'totalRendah',
+            'totalSedang',
+            'totalTinggi',
+            'activeModel'
+        ));
+    }
+
+    /**
+     * Show single prediction form
+     */
+    public function createSingle(Request $request)
+    {
+        $activeModel = C45Model::active()->first();
+        if (!$activeModel) {
+            $activeModel = C45Model::latest()->first();
+        }
+
+        $mahasiswas = Mahasiswa::with('latestAkademik')->orderBy('nim', 'asc')->get();
+        $selectedMahasiswaId = $request->input('mahasiswa_id');
+        $selectedMahasiswa = $selectedMahasiswaId ? Mahasiswa::with('latestAkademik')->find($selectedMahasiswaId) : null;
+
+        return view('prediksi.single', compact('activeModel', 'mahasiswas', 'selectedMahasiswa'));
+    }
+
+    /**
+     * Process single prediction request
+     */
+    public function storeSingle(Request $request)
+    {
+        $activeModel = C45Model::active()->first();
+        if (!$activeModel) {
+            $activeModel = C45Model::latest()->first();
+            if (!$activeModel) {
+                return redirect()->route('admin.c45.create')
+                    ->with('error', 'Belum ada model C4.5 yang terlatih. Silakan latih model terlebih dahulu.');
+            }
+        }
+
+        $validated = $request->validate([
+            'mahasiswa_id' => ['nullable', 'exists:mahasiswas,id'],
+            'nim' => ['nullable', 'string', 'max:30'],
+            'nama_mahasiswa' => ['required', 'string', 'max:150'],
+            'semester' => ['required', 'integer', 'min:1', 'max:14'],
+            'ipk' => ['required', 'numeric', 'min:0', 'max:4.00'],
+            'ips' => ['required', 'numeric', 'min:0', 'max:4.00'],
+            'sks_semester' => ['required', 'integer', 'min:0', 'max:30'],
+            'sks_tidak_lulus' => ['required', 'integer', 'min:0', 'max:60'],
+            'persentase_kehadiran' => ['required', 'numeric', 'min:0', 'max:100.00'],
+            'status_cuti' => ['nullable', 'boolean'],
+        ]);
+
+        $ipk = (float) $validated['ipk'];
+        $ips = (float) $validated['ips'];
+        $sksSemester = (int) $validated['sks_semester'];
+        $sksTidakLulus = (int) $validated['sks_tidak_lulus'];
+        $kehadiran = (float) $validated['persentase_kehadiran'];
+        $isCuti = $request->boolean('status_cuti');
+
+        // Preprocess categories
+        $inputCategories = [
+            'kategori_ipk' => DataPreprocessingService::categorizeIpk($ipk),
+            'kategori_ips' => DataPreprocessingService::categorizeIps($ips),
+            'kategori_sks' => DataPreprocessingService::categorizeSks($sksSemester),
+            'kategori_kehadiran' => DataPreprocessingService::categorizeKehadiran($kehadiran),
+            'status_cuti' => $isCuti ? 'Ya' : 'Tidak',
+            'sks_tidak_lulus' => $sksTidakLulus > 0 ? 'Ada' : 'Tidak Ada',
+        ];
+
+        // Predict with Active C4.5 Tree
+        $treeArray = json_decode($activeModel->tree_structure_json, true) ?? [];
+        $predictionResult = C45EngineService::predictWithTree($treeArray, $inputCategories);
+
+        $decision = $predictionResult['decision'] ?? 'Risiko Sedang';
+        $confidence = $predictionResult['confidence'] ?? 80.0;
+
+        // Match Rule if any
+        $matchedRule = $this->findMatchingRule($activeModel->id, $inputCategories);
+
+        // Generate Academic Recommendation
+        $rekomendasi = $this->generateRecommendation($decision, $ipk, $kehadiran, $sksTidakLulus, $isCuti);
+        $statusDo = ($decision === 'Risiko Tinggi' || $isCuti || $ipk < 2.25) ? 'Berisiko DO' : 'Tidak Berisiko DO';
+
+        $prediksi = Prediksi::create([
+            'mahasiswa_id' => $validated['mahasiswa_id'] ?? null,
+            'model_id' => $activeModel->id,
+            'rule_id' => $matchedRule?->id,
+            'nim' => $validated['nim'] ?? null,
+            'nama_mahasiswa' => $validated['nama_mahasiswa'],
+            'semester' => $validated['semester'],
+            'input_params_json' => array_merge($validated, $inputCategories),
+            'hasil_klasifikasi' => $decision,
+            'status_do' => $statusDo,
+            'confidence_score' => $confidence,
+            'rekomendasi_akademik' => $rekomendasi,
+            'created_by' => Auth::id(),
+        ]);
+
+        return redirect()->route('admin.prediksi.show', $prediksi)
+            ->with('success', "Prediksi berhasil dihitung menggunakan Model '{$activeModel->nama_model}'!");
+    }
+
+    /**
+     * Show single prediction detailed report / certificate
+     */
+    public function show(Prediksi $prediksi)
+    {
+        $prediksi->load(['mahasiswa', 'model', 'rule', 'creator']);
+        return view('prediksi.show', compact('prediksi'));
+    }
+
+    /**
+     * Show batch prediction upload form
+     */
+    public function createBatch()
+    {
+        $activeModel = C45Model::active()->first();
+        return view('prediksi.batch', compact('activeModel'));
+    }
+
+    /**
+     * Process batch prediction from uploaded Excel file
+     */
+    public function storeBatch(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
+        ]);
+
+        $activeModel = C45Model::active()->first() ?? C45Model::latest()->first();
+        if (!$activeModel) {
+            return back()->with('error', 'Belum ada model C4.5 yang tersedia untuk melakukan prediksi.');
+        }
+
+        $spreadsheet = IOFactory::load($request->file('file')->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        if (count($rows) <= 1) {
+            return back()->with('error', 'File Excel kosong atau tidak memiliki baris data.');
+        }
+
+        array_shift($rows); // Remove header
+        $treeArray = json_decode($activeModel->tree_structure_json, true) ?? [];
+
+        $batchCode = 'BATCH-' . date('Ymd-His') . '-' . strtoupper(substr(uniqid(), -4));
+
+        DB::beginTransaction();
+
+        try {
+            $totalRecords = 0;
+            $totalRendah = 0;
+            $totalSedang = 0;
+            $totalTinggi = 0;
+
+            $batch = PrediksiBatch::create([
+                'batch_code' => $batchCode,
+                'file_name' => $request->file('file')->getClientOriginalName(),
+                'model_id' => $activeModel->id,
+                'total_records' => 0,
+                'total_rendah' => 0,
+                'total_sedang' => 0,
+                'total_tinggi' => 0,
+                'created_by' => Auth::id(),
+            ]);
+
+            foreach ($rows as $row) {
+                $nim = trim((string) ($row[0] ?? ''));
+                $nama = trim((string) ($row[1] ?? ''));
+
+                if (empty($nama) && empty($nim)) {
+                    continue;
+                }
+
+                $semester = (int) ($row[8] ?? 1);
+                $ips = (float) str_replace(',', '.', (string) ($row[10] ?? 0));
+                $ipk = (float) str_replace(',', '.', (string) ($row[11] ?? 0));
+                $sksSemester = (int) ($row[12] ?? 20);
+                $sksTidakLulus = (int) ($row[14] ?? 0);
+                $kehadiran = (float) str_replace(',', '.', (string) ($row[15] ?? 85.0));
+                $cutiStr = strtolower(trim((string) ($row[16] ?? 'tidak')));
+                $isCuti = in_array($cutiStr, ['ya', '1', 'true', 'cuti']);
+
+                $inputCategories = [
+                    'kategori_ipk' => DataPreprocessingService::categorizeIpk($ipk),
+                    'kategori_ips' => DataPreprocessingService::categorizeIps($ips),
+                    'kategori_sks' => DataPreprocessingService::categorizeSks($sksSemester),
+                    'kategori_kehadiran' => DataPreprocessingService::categorizeKehadiran($kehadiran),
+                    'status_cuti' => $isCuti ? 'Ya' : 'Tidak',
+                    'sks_tidak_lulus' => $sksTidakLulus > 0 ? 'Ada' : 'Tidak Ada',
+                ];
+
+                $predResult = C45EngineService::predictWithTree($treeArray, $inputCategories);
+                $decision = $predResult['decision'] ?? 'Risiko Sedang';
+                $confidence = $predResult['confidence'] ?? 85.0;
+
+                if ($decision === 'Risiko Rendah') $totalRendah++;
+                elseif ($decision === 'Risiko Sedang') $totalSedang++;
+                elseif ($decision === 'Risiko Tinggi') $totalTinggi++;
+
+                $matchedRule = $this->findMatchingRule($activeModel->id, $inputCategories);
+                $rekomendasi = $this->generateRecommendation($decision, $ipk, $kehadiran, $sksTidakLulus, $isCuti);
+                $statusDo = ($decision === 'Risiko Tinggi' || $isCuti || $ipk < 2.25) ? 'Berisiko DO' : 'Tidak Berisiko DO';
+
+                // Look up student if NIM matches
+                $mhs = Mahasiswa::where('nim', $nim)->first();
+
+                Prediksi::create([
+                    'mahasiswa_id' => $mhs?->id,
+                    'model_id' => $activeModel->id,
+                    'rule_id' => $matchedRule?->id,
+                    'batch_id' => $batch->id,
+                    'nim' => $nim ?: null,
+                    'nama_mahasiswa' => $nama ?: ($mhs?->nama ?? 'Mahasiswa'),
+                    'semester' => $semester,
+                    'input_params_json' => array_merge([
+                        'nim' => $nim,
+                        'nama_mahasiswa' => $nama,
+                        'semester' => $semester,
+                        'ipk' => $ipk,
+                        'ips' => $ips,
+                        'sks_semester' => $sksSemester,
+                        'sks_tidak_lulus' => $sksTidakLulus,
+                        'persentase_kehadiran' => $kehadiran,
+                        'status_cuti' => $isCuti,
+                    ], $inputCategories),
+                    'hasil_klasifikasi' => $decision,
+                    'status_do' => $statusDo,
+                    'confidence_score' => $confidence,
+                    'rekomendasi_akademik' => $rekomendasi,
+                    'created_by' => Auth::id(),
+                ]);
+
+                $totalRecords++;
+            }
+
+            $batch->update([
+                'total_records' => $totalRecords,
+                'total_rendah' => $totalRendah,
+                'total_sedang' => $totalSedang,
+                'total_tinggi' => $totalTinggi,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.prediksi.batch.show', $batch)
+                ->with('success', "Prediksi massal selesai! Total {$totalRecords} mahasiswa berhasil diklasifikasikan.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memproses batch prediksi: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show batch prediction detailed results
+     */
+    public function showBatch(PrediksiBatch $batch)
+    {
+        $batch->load(['model', 'creator', 'prediksis.mahasiswa']);
+        $prediksis = $batch->prediksis()->paginate(15);
+
+        return view('prediksi.batch_show', compact('batch', 'prediksis'));
+    }
+
+    /**
+     * Export batch prediction results to Excel
+     */
+    public static function exportBatch(PrediksiBatch $batch): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Hasil Prediksi ' . substr($batch->batch_code, 0, 15));
+
+        $headers = [
+            'A1' => 'No',
+            'B1' => 'NIM',
+            'C1' => 'Nama Mahasiswa',
+            'D1' => 'Semester',
+            'E1' => 'IPK',
+            'F1' => 'Kehadiran (%)',
+            'G1' => 'Status Cuti',
+            'H1' => 'Hasil Prediksi Risiko',
+            'I1' => 'Potensi Drop Out',
+            'J1' => 'Confidence (%)',
+            'K1' => 'Rekomendasi Akademik',
+        ];
+
+        foreach ($headers as $cell => $value) {
+            $sheet->setCellValue($cell, $value);
+        }
+
+        $sheet->getStyle('A1:K1')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '047857']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        $prediksis = $batch->prediksis()->get();
+        $rowIdx = 2;
+
+        foreach ($prediksis as $i => $item) {
+            $input = $item->input_params_json ?? [];
+            $sheet->setCellValue('A' . $rowIdx, $i + 1);
+            $sheet->setCellValue('B' . $rowIdx, $item->nim ?? '-');
+            $sheet->setCellValue('C' . $rowIdx, $item->nama_mahasiswa);
+            $sheet->setCellValue('D' . $rowIdx, $item->semester);
+            $sheet->setCellValue('E' . $rowIdx, $input['ipk'] ?? '-');
+            $sheet->setCellValue('F' . $rowIdx, $input['persentase_kehadiran'] ?? '-');
+            $sheet->setCellValue('G' . $rowIdx, ($input['status_cuti'] ?? false) ? 'Ya' : 'Tidak');
+            $sheet->setCellValue('H' . $rowIdx, $item->hasil_klasifikasi);
+            $sheet->setCellValue('I' . $rowIdx, $item->status_do);
+            $sheet->setCellValue('J' . $rowIdx, $item->confidence_score);
+            $sheet->setCellValue('K' . $rowIdx, $item->rekomendasi_akademik);
+            $rowIdx++;
+        }
+
+        foreach (range('A', 'K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="Hasil_Prediksi_' . $batch->batch_code . '.xlsx"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
+
+    /**
+     * Helper to match an input with stored rules
+     */
+    protected function findMatchingRule(int $modelId, array $inputCategories): ?C45Rule
+    {
+        $rules = C45Rule::where('model_id', $modelId)->get();
+
+        foreach ($rules as $rule) {
+            $conditions = $rule->conditions_json ?? [];
+            $isMatch = true;
+
+            foreach ($conditions as $cond) {
+                $attr = $cond['attribute'] ?? '';
+                $val = $cond['value'] ?? '';
+
+                if (($inputCategories[$attr] ?? null) !== $val) {
+                    $isMatch = false;
+                    break;
+                }
+            }
+
+            if ($isMatch && !empty($conditions)) {
+                return $rule;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Helper to generate proactive academic intervention recommendation text
+     */
+    protected function generateRecommendation(string $decision, float $ipk, float $kehadiran, int $sksTidakLulus, bool $isCuti): string
+    {
+        if ($decision === 'Risiko Rendah') {
+            return "Performa akademik sangat baik (IPK: {$ipk}, Kehadiran: {$kehadiran}%). Mahasiswa berpeluang tinggi lulus tepat waktu. Disarankan untuk mulai merancang topik proposal skripsi/tugas akhir dan aktif mengikuti kegiatan ilmiah/magang.";
+        } elseif ($decision === 'Risiko Sedang') {
+            $catatan = [];
+            if ($ipk <= 3.00) $catatan[] = "peningkatan nilai IPK";
+            if ($kehadiran < 85.0) $catatan[] = "peningkatan absensi perkuliahan di atas 85%";
+            if ($sksTidakLulus > 0) $catatan[] = "perbaikan mata kuliah mengulang ({$sksTidakLulus} SKS)";
+            $catatanStr = !empty($catatan) ? implode(", ", $catatan) : "pemantauan studi berkala";
+
+            return "Perlu pendampingan Dosen Pembimbing Akademik (Dosen PA). Mahasiswa disarankan fokus pada {$catatanStr}, serta membatasi pengambilan beban SKS maksimal 20 SKS pada semester berikutnya.";
+        } else {
+            return "PERINGATAN DINI (EARLY WARNING): Mahasiswa berpotensi mengalami kendala kelulusan atau risiko Drop Out (IPK: {$ipk}, Kehadiran: {$kehadiran}%). Direkomendasikan segera dilakukan pemanggilan konseling akademik khusus bersama Kaprodi/Dosen PA, pembatasan beban SKS, dan program remidial intensif.";
+        }
+    }
+}
