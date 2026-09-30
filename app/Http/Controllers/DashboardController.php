@@ -69,43 +69,20 @@ class DashboardController extends Controller
     }
 
     /**
-     * Dashboard view for Pihak Prodi / Dosen PA
+     * Dashboard view for Pihak Prodi / Monitoring Akademik
      */
     public function prodiDashboard()
     {
-        $user = Auth::user();
         $totalMahasiswa = Mahasiswa::count();
         $activeModel = C45Model::active()->first();
         $totalPrediksi = Prediksi::count();
 
-        // Risk Breakdown
+        // Risk Breakdown across department
         $totalRisikoRendah = DataAkademik::where('label_risiko_aktual', 'Risiko Rendah')->count();
         $totalRisikoSedang = DataAkademik::where('label_risiko_aktual', 'Risiko Sedang')->count();
         $totalRisikoTinggi = DataAkademik::where('label_risiko_aktual', 'Risiko Tinggi')->count();
 
-        // Advisee specific metrics for Dosen PA
-        $myBimbinganTotal = 0;
-        $myBimbinganHighRisk = 0;
-        $myBimbinganPendingIntervention = 0;
-
-        if ($user->isDosenPa()) {
-            $myBimbinganTotal = Mahasiswa::where('dosen_pa_id', $user->id)->count();
-            $myBimbinganHighRisk = DataAkademik::whereHas('mahasiswa', fn($q) => $q->where('dosen_pa_id', $user->id))
-                ->where('label_risiko_aktual', 'Risiko Tinggi')
-                ->count();
-            $myBimbinganPendingIntervention = DataAkademik::whereHas('mahasiswa', fn($q) => $q->where('dosen_pa_id', $user->id))
-                ->where(function($q) {
-                    $q->where('label_risiko_aktual', 'Risiko Tinggi')
-                      ->orWhere('ipk', '<', 2.75)
-                      ->orWhere('persentase_kehadiran', '<', 75.0);
-                })
-                ->where(function($q) {
-                    $q->whereNull('status_intervensi')
-                      ->orWhere('status_intervensi', 'Belum Ditindaklanjuti');
-                })->count();
-        }
-
-        // High-risk students requiring immediate attention
+        // High-risk students requiring immediate attention & Dosen PA consultation
         $highRiskStudents = DataAkademik::with(['mahasiswa.dosenPa'])
             ->where('label_risiko_aktual', 'Risiko Tinggi')
             ->latest()
@@ -119,20 +96,17 @@ class DashboardController extends Controller
             'totalRisikoRendah',
             'totalRisikoSedang',
             'totalRisikoTinggi',
-            'highRiskStudents',
-            'myBimbinganTotal',
-            'myBimbinganHighRisk',
-            'myBimbinganPendingIntervention'
+            'highRiskStudents'
         ));
     }
 
     /**
-     * Dashboard view for Mahasiswa (Personalized Early Warning Portal)
+     * Dashboard view for Mahasiswa (Personalized Early Warning Portal & Dosen PA Counseling Advice)
      */
     public function mahasiswaDashboard()
     {
         $user = Auth::user();
-        $mahasiswa = Mahasiswa::with(['dataAkademiks', 'latestAkademik', 'latestPrediksi'])
+        $mahasiswa = Mahasiswa::with(['dataAkademiks', 'latestAkademik.dosenPa', 'latestPrediksi', 'dosenPa'])
             ->where('user_id', $user->id)
             ->orWhere('nim', $user->nim_nip)
             ->first();

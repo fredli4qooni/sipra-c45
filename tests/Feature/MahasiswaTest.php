@@ -86,4 +86,22 @@ class MahasiswaTest extends TestCase
         $mhs = Mahasiswa::where('nim', '2271029998')->first();
         $this->assertEquals($dosenPa->id, $mhs->dosenPa->id);
     }
+
+    public function test_mahasiswa_dashboard_shows_dosen_pa_consultation_advice(): void
+    {
+        $mhsUser = User::where('role', 'mahasiswa')->first();
+        $dosenPa = User::where('role', 'dosen_pa')->first();
+
+        // Assign Dosen PA with phone number to the student
+        $dosenPa->update(['phone' => '081234567890']);
+        $mhs = Mahasiswa::where('nim', $mhsUser->nim_nip)->first();
+        $mhs->update(['dosen_pa_id' => $dosenPa->id]);
+
+        $response = $this->actingAs($mhsUser)->get(route('mahasiswa.dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('Dosen Pembimbing Akademik (Dosen PA)');
+        $response->assertSee($dosenPa->name);
+        $response->assertSee('Konsultasi via WhatsApp');
+        $response->assertSee('https://wa.me/6281234567890', false);
+    }
 }

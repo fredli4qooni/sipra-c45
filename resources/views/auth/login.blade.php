@@ -189,9 +189,9 @@
             <div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 space-y-1.5">
                 <p class="font-bold text-slate-800">Format Kredensial Masuk:</p>
                 <ul class="list-disc list-inside space-y-1 text-slate-600 pl-1">
-                    <li><strong>Dosen PA & Kaprodi</strong>: Menggunakan NIP resmi atau email <code>@uinril.ac.id</code>.</li>
-                    <li><strong>Mahasiswa</strong>: Menggunakan NPM aktif (contoh: <code>2271020052</code>) atau email student.</li>
-                    <li><strong>Admin</strong>: Menggunakan akun berwenang pengelola sistem.</li>
+                    <li><strong>Kaprodi / Pihak Prodi</strong>: Menggunakan NIP resmi atau email <code>@uinril.ac.id</code>.</li>
+                    <li><strong>Mahasiswa</strong>: Menggunakan NPM aktif (contoh: <code>2271020052</code>) atau email mahasiswa.</li>
+                    <li><strong>Admin</strong>: Menggunakan akun administrator pengelola sistem.</li>
                 </ul>
             </div>
 

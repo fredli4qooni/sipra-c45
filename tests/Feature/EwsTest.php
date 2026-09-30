@@ -51,24 +51,23 @@ class EwsTest extends TestCase
         ]);
     }
 
-    public function test_dosen_pa_can_view_ews_with_dual_scope(): void
+    public function test_admin_and_prodi_can_filter_ews_by_dosen_pa(): void
     {
         $dosenPa = User::where('role', 'dosen_pa')->first();
         $this->assertNotNull($dosenPa);
 
-        // 1. Default / bimbingan_saya scope
-        $responseBimbingan = $this->actingAs($dosenPa)->get(route('prodi.ews.index', ['scope' => 'bimbingan_saya']));
-        $responseBimbingan->assertStatus(200);
-        $responseBimbingan->assertSee('Mahasiswa Bimbingan Saya');
+        // 1. Filter by specific Dosen PA
+        $responseFilter = $this->actingAs($this->prodi)->get(route('prodi.ews.index', ['dosen_pa_id' => $dosenPa->id]));
+        $responseFilter->assertStatus(200);
+        $responseFilter->assertSee('Daftar Mahasiswa Terindikasi Masalah Akademik');
 
-        // 2. semua scope
-        $responseSemua = $this->actingAs($dosenPa)->get(route('prodi.ews.index', ['scope' => 'semua']));
-        $responseSemua->assertStatus(200);
-        $responseSemua->assertSee('Semua Mahasiswa Prodi');
+        // 2. Filter by unassigned
+        $responseUnassigned = $this->actingAs($this->admin)->get(route('admin.ews.index', ['dosen_pa_id' => 'unassigned']));
+        $responseUnassigned->assertStatus(200);
 
-        // 3. Dashboard shows Dosen PA banner
-        $responseDashboard = $this->actingAs($dosenPa)->get(route('prodi.dashboard'));
+        // 3. Prodi dashboard shows monitoring overview without errors
+        $responseDashboard = $this->actingAs($this->prodi)->get(route('prodi.dashboard'));
         $responseDashboard->assertStatus(200);
-        $responseDashboard->assertSee('Perhatian Dosen Pembimbing Akademik');
+        $responseDashboard->assertSee('Dashboard Pemantauan Akademik');
     }
 }

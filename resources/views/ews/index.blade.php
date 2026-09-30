@@ -67,29 +67,6 @@
         $ewsIndexRoute = auth()->user()->isAdmin() ? route('admin.ews.index') : route('prodi.ews.index');
     @endphp
 
-    <!-- Dosen PA / Scope Navigation Pills -->
-    @if(auth()->user()->isDosenPa())
-        <div class="flex items-center space-x-2 bg-slate-100/80 p-1.5 rounded-xl max-w-fit border border-slate-200/80">
-            <a href="{{ $ewsIndexRoute }}?scope=bimbingan_saya" 
-               class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center {{ $scope === 'bimbingan_saya' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
-                <i data-lucide="star" class="w-3.5 h-3.5 mr-1.5 {{ $scope === 'bimbingan_saya' ? 'fill-amber-400 text-amber-500' : 'text-slate-400' }}"></i>
-                Mahasiswa Bimbingan Saya
-                <span class="ml-2 px-1.5 py-0.5 rounded-md text-[10px] font-bold {{ $scope === 'bimbingan_saya' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-600' }}">
-                    {{ $myBimbinganCount }}
-                </span>
-            </a>
-
-            <a href="{{ $ewsIndexRoute }}?scope=semua" 
-               class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center {{ $scope === 'semua' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
-                <i data-lucide="users" class="w-3.5 h-3.5 mr-1.5 text-slate-400"></i>
-                Semua Mahasiswa Prodi
-                <span class="ml-2 px-1.5 py-0.5 rounded-md text-[10px] font-bold {{ $scope === 'semua' ? 'bg-slate-200 text-slate-800' : 'bg-slate-200 text-slate-600' }}">
-                    {{ $allAlertCount }}
-                </span>
-            </a>
-        </div>
-    @endif
-
     <!-- Alert List Table Card -->
     <div class="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-100">
@@ -97,11 +74,7 @@
                 <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
                 <div>
                     <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                        @if(auth()->user()->isDosenPa() && $scope === 'bimbingan_saya')
-                            Daftar Mahasiswa Bimbingan Anda (Perlu Pemantauan EWS)
-                        @else
-                            Daftar Mahasiswa Terindikasi Masalah Akademik
-                        @endif
+                        Daftar Mahasiswa Terindikasi Masalah Akademik & Pemantauan PA
                     </h4>
                     <p class="text-[11px] text-slate-500">Klik "Bimbingan PA" untuk memperbarui status tindak lanjut dan mencatat hasil konsultasi</p>
                 </div>
@@ -109,18 +82,14 @@
 
             <!-- Filter Toolbar -->
             <form method="GET" action="{{ $ewsIndexRoute }}" class="flex flex-wrap items-center gap-2">
-                <input type="hidden" name="scope" value="{{ $scope }}">
-
-                <!-- Dosen PA Filter (For Admin, Prodi, or all students view) -->
-                @if(!auth()->user()->isDosenPa() || $scope === 'semua')
-                    <select name="dosen_pa_id" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
-                        <option value="">Semua Dosen PA</option>
-                        <option value="unassigned" {{ request('dosen_pa_id') == 'unassigned' ? 'selected' : '' }}>Belum Ada PA</option>
-                        @foreach($dosenPas as $dosen)
-                            <option value="{{ $dosen->id }}" {{ request('dosen_pa_id') == $dosen->id ? 'selected' : '' }}>PA: {{ Str::limit($dosen->name, 16) }}</option>
-                        @endforeach
-                    </select>
-                @endif
+                <!-- Dosen PA Filter (Admin & Prodi filter) -->
+                <select name="dosen_pa_id" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
+                    <option value="">Semua Dosen PA</option>
+                    <option value="unassigned" {{ request('dosen_pa_id') == 'unassigned' ? 'selected' : '' }}>Belum Ada PA</option>
+                    @foreach($dosenPas as $dosen)
+                        <option value="{{ $dosen->id }}" {{ request('dosen_pa_id') == $dosen->id ? 'selected' : '' }}>PA: {{ Str::limit($dosen->name, 16) }}</option>
+                    @endforeach
+                </select>
 
                 <!-- Semester Filter -->
                 <select name="semester" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition">
@@ -167,14 +136,7 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3 font-mono font-bold text-rose-700">{{ $akd->mahasiswa->nim }}</td>
                             <td class="py-3">
-                                <div class="flex items-center gap-1.5">
-                                    <p class="font-bold text-slate-900">{{ $akd->mahasiswa->nama }}</p>
-                                    @if(auth()->user()->isDosenPa() && $akd->mahasiswa->dosen_pa_id === auth()->id())
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0" title="Mahasiswa bimbingan Anda">
-                                            <i data-lucide="star" class="w-2.5 h-2.5 mr-0.5 fill-amber-400"></i> Bimbingan Anda
-                                        </span>
-                                    @endif
-                                </div>
+                                <p class="font-bold text-slate-900">{{ $akd->mahasiswa->nama }}</p>
                                 <p class="text-[10px] text-slate-400">Angkatan {{ $akd->mahasiswa->angkatan ?? '-' }}</p>
                             </td>
                             <td class="py-3">

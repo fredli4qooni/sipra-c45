@@ -164,7 +164,7 @@ class PrediksiController extends Controller
      */
     public function show(Prediksi $prediksi)
     {
-        $prediksi->load(['mahasiswa', 'model', 'rule', 'creator']);
+        $prediksi->load(['mahasiswa.dosenPa', 'model', 'rule', 'creator']);
 
         $treeArray = [];
         if ($prediksi->model && !empty($prediksi->model->tree_structure_json)) {

@@ -279,14 +279,44 @@
         @endif
 
         <!-- Proactive Academic Intervention Recommendation Box -->
-        <div class="p-5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+        <div class="p-5 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
             <div class="flex items-center space-x-2">
                 <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600"></i>
-                <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Rekomendasi Intervensi Akademik (Dosen PA / Prodi):</h5>
+                <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Rekomendasi & Saran Bimbingan Akademik (Dosen PA):</h5>
             </div>
             <p class="text-xs text-slate-700 leading-relaxed bg-white p-4 rounded-lg border border-slate-200">
                 {{ $prediksi->rekomendasi_akademik }}
             </p>
+
+            @php
+                $pa = $prediksi->mahasiswa?->dosenPa;
+                $paPhone = $pa ? preg_replace('/[^0-9]/', '', $pa->phone ?? '') : '';
+                if (str_starts_with($paPhone, '0')) {
+                    $paPhone = '62' . substr($paPhone, 1);
+                }
+                $predWaMsg = "Assalamu'alaikum Wr. Wb. Bapak/Ibu " . ($pa->name ?? 'Dosen PA') . ", perkenalkan saya " . $prediksi->nama_mahasiswa . " (NPM: " . ($prediksi->nim ?? '-') . "). Sehubungan dengan lembar hasil evaluasi prediksi akademik SIPRA-C4.5 (Status: " . $prediksi->hasil_klasifikasi . "), saya bermaksud memohon izin dan arahan untuk berkonsultasi mengenai kelanjutan rencana studi saya. Terima kasih.";
+                $predWaUrl = !empty($paPhone) ? "https://wa.me/{$paPhone}?text=" . rawurlencode($predWaMsg) : null;
+            @endphp
+
+            @if($pa)
+                <div class="p-4 rounded-lg bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 font-bold text-xs shadow-2xs">
+                            <i data-lucide="user-check" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-900">Dosen Pembimbing Akademik: <span class="text-emerald-950 font-extrabold">{{ $pa->name }}</span></p>
+                            <p class="text-[11px] text-slate-500 font-mono">NIP/NIDN: {{ $pa->nim_nip ?? '-' }} • Email: {{ $pa->email }}</p>
+                        </div>
+                    </div>
+                    @if($predWaUrl)
+                        <a href="{{ $predWaUrl }}" target="_blank" rel="noopener noreferrer" class="no-print px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-2xs transition inline-flex items-center space-x-1.5 self-start sm:self-auto cursor-pointer">
+                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                            <span>Hubungi Dosen PA via WhatsApp</span>
+                        </a>
+                    @endif
+                </div>
+            @endif
         </div>
 
         <!-- Signature Footer (for Print Format) -->
@@ -295,8 +325,10 @@
                 <p>Mengetahui,</p>
                 <p class="font-bold text-slate-900 mt-1">Dosen Pembimbing Akademik</p>
                 <div class="h-16"></div>
-                <p class="font-bold text-slate-900 underline">( .................................................... )</p>
-                <p class="text-[10px]">NIP. ........................................</p>
+                <p class="font-bold text-slate-900 underline">
+                    ( {{ $prediksi->mahasiswa?->dosenPa?->name ?? '....................................................' }} )
+                </p>
+                <p class="text-[10px]">NIP. {{ $prediksi->mahasiswa?->dosenPa?->nim_nip ?? '........................................' }}</p>
             </div>
             <div>
                 <p>Bandar Lampung, {{ date('d F Y') }}</p>
