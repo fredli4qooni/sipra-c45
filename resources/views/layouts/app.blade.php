@@ -86,11 +86,11 @@
             background: #94a3b8;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .animate-fade-in {
-            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
     @stack('styles')
@@ -365,7 +365,7 @@
             </header>
 
             <!-- PAGE CONTENT (Full Width Responsive with Balanced Padding) -->
-            <main class="flex-1 px-4 sm:px-8 py-6 w-full space-y-6 animate-fade-in">
+            <main class="flex-1 px-4 sm:px-8 py-6 w-full space-y-6">
                 
                 <!-- Breadcrumbs & Title Bar -->
                 @hasSection('title')
@@ -452,6 +452,10 @@
             backdrop.addEventListener('click', toggleSidebar);
         }
     </script>
+    
+    <!-- Modals Container at root of body -->
+    @stack('modals')
+
     @stack('scripts')
 </body>
 </html>
