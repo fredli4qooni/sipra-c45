@@ -294,7 +294,10 @@
                 if (str_starts_with($paPhone, '0')) {
                     $paPhone = '62' . substr($paPhone, 1);
                 }
-                $predWaMsg = "Assalamu'alaikum Wr. Wb. Bapak/Ibu " . ($pa->name ?? 'Dosen PA') . ", perkenalkan saya " . $prediksi->nama_mahasiswa . " (NPM: " . ($prediksi->nim ?? '-') . "). Sehubungan dengan lembar hasil evaluasi prediksi akademik SIPRA-C4.5 (Status: " . $prediksi->hasil_klasifikasi . "), saya bermaksud memohon izin dan arahan untuk berkonsultasi mengenai kelanjutan rencana studi saya. Terima kasih.";
+                $configRisiko = \App\Models\KategoriRisiko::getByStatus($prediksi->hasil_klasifikasi);
+                $predWaMsg = ($configRisiko && $prediksi->mahasiswa)
+                    ? $configRisiko->formatWaMessage($prediksi->mahasiswa, $pa)
+                    : "Assalamu'alaikum Wr. Wb. Bapak/Ibu " . ($pa->name ?? 'Dosen PA') . ", perkenalkan saya " . $prediksi->nama_mahasiswa . " (NPM: " . ($prediksi->nim ?? '-') . "). Sehubungan dengan lembar hasil evaluasi prediksi akademik SIPRA-C4.5 (Status: " . $prediksi->hasil_klasifikasi . "), saya bermaksud memohon izin dan arahan untuk berkonsultasi mengenai kelanjutan rencana studi saya. Terima kasih.";
                 $predWaUrl = !empty($paPhone) ? "https://wa.me/{$paPhone}?text=" . rawurlencode($predWaMsg) : null;
             @endphp
 

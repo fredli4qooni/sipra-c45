@@ -198,6 +198,11 @@
                             <i data-lucide="graduation-cap" class="w-4 h-4 {{ request()->routeIs('admin.akademik.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
                             <span>Nilai & Akademik</span>
                         </a>
+
+                        <a href="{{ route('admin.risiko.index') }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-semibold transition {{ request()->routeIs('admin.risiko.*') ? 'bg-brand-50 text-brand-800 border border-brand-200/80 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                            <i data-lucide="sliders" class="w-4 h-4 {{ request()->routeIs('admin.risiko.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
+                            <span>Kelola Teks Risiko</span>
+                        </a>
                     </div>
                 @endif
 

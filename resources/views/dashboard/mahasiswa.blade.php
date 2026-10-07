@@ -107,25 +107,11 @@
             </div>
 
             <div class="p-4 rounded-lg bg-brand-50/50 border border-brand-200/80 text-xs text-slate-700 leading-relaxed">
-                @if($statusRisiko === 'Risiko Rendah')
-                    <p class="font-semibold text-brand-900 mb-1 flex items-center gap-1.5">
-                        <i data-lucide="award" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
-                        <span>Pertahankan Konsistensi Belajar!</span>
-                    </p>
-                    <p>Performa akademik Anda sangat memuaskan. Anda berada di jalur yang tepat untuk lulus tepat waktu pada semester 8. Disarankan untuk mulai merancang topik proposal skripsi/tugas akhir dan aktif mengikuti kegiatan magang atau konferensi ilmiah.</p>
-                @elseif($statusRisiko === 'Risiko Sedang')
-                    <p class="font-semibold text-amber-900 mb-1 flex items-center gap-1.5">
-                        <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
-                        <span>Perhatian & Pendampingan</span>
-                    </p>
-                    <p>Terdapat beberapa indikator performa yang perlu ditingkatkan, seperti absensi kehadiran perkuliahan atau perbaikan mata kuliah. Disarankan untuk menjadwalkan sesi konsultasi bimbingan bersama Dosen Pembimbing Akademik (PA) Anda.</p>
-                @else
-                    <p class="font-semibold text-rose-900 mb-1 flex items-center gap-1.5">
-                        <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 flex-shrink-0"></i>
-                        <span>Peringatan Dini Akademik</span>
-                    </p>
-                    <p>Performa akademik Anda terindikasi memiliki risiko keterlambatan studi. Segera hubungi Dosen Pembimbing Akademik (Dosen PA) untuk menyusun rencana perbaikan nilai dan konsultasi khusus.</p>
-                @endif
+                <p class="font-semibold text-brand-900 mb-1 flex items-center gap-1.5">
+                    <i data-lucide="{{ $configRisiko?->icon ?? 'award' }}" class="w-4 h-4 text-brand-600 flex-shrink-0"></i>
+                    <span>{{ $configRisiko?->label_badge ?? 'Panduan Rencana Studi' }}</span>
+                </p>
+                <p>{{ $configRisiko?->rekomendasi_studi ?? 'Performa akademik Anda sangat memuaskan. Anda berada di jalur yang tepat untuk lulus tepat waktu pada semester 8.' }}</p>
             </div>
         </div>
 
@@ -137,7 +123,9 @@
             if (str_starts_with($cleanPhone, '0')) {
                 $cleanPhone = '62' . substr($cleanPhone, 1);
             }
-            $waMessage = "Assalamu'alaikum Wr. Wb. Bapak/Ibu " . ($dosen->name ?? 'Dosen PA') . ", perkenalkan saya " . $mahasiswa->nama . " (NPM: " . $mahasiswa->nim . "), mahasiswa bimbingan akademik Anda di Prodi Sistem Informasi. Sehubungan dengan hasil evaluasi akademik SIPRA-C4.5 (Status: " . $statusRisiko . "), saya bermaksud memohon izin dan arahan untuk berkonsultasi mengenai rencana studi saya. Terima kasih.";
+            $waMessage = $configRisiko 
+                ? $configRisiko->formatWaMessage($mahasiswa, $dosen, $latestAkademik)
+                : "Assalamu'alaikum Wr. Wb. Bapak/Ibu " . ($dosen->name ?? 'Dosen PA') . ", perkenalkan saya " . $mahasiswa->nama . " (NPM: " . $mahasiswa->nim . "), mahasiswa bimbingan akademik Anda di Prodi Sistem Informasi. Sehubungan dengan hasil evaluasi akademik SIPRA-C4.5 (Status: " . $statusRisiko . "), saya bermaksud memohon izin dan arahan untuk berkonsultasi mengenai rencana studi saya. Terima kasih.";
             $waUrl = !empty($cleanPhone) ? "https://wa.me/{$cleanPhone}?text=" . rawurlencode($waMessage) : null;
             $mailSubject = "Konsultasi Bimbingan Akademik - " . $mahasiswa->nama . " (" . $mahasiswa->nim . ")";
             $mailBody = "Yth. Bapak/Ibu " . ($dosen->name ?? 'Dosen Pembimbing Akademik') . ",\n\nPerkenalkan saya mahasiswa bimbingan akademik Anda:\n- Nama: " . $mahasiswa->nama . "\n- NPM: " . $mahasiswa->nim . "\n- Program Studi: Sistem Informasi\n- Status Deteksi Dini: " . $statusRisiko . "\n- IPK Kumulatif: " . ($latestAkademik->ipk ?? '0.00') . "\n- Kehadiran: " . ($latestAkademik->persentase_kehadiran ?? '0') . "%\n\nSehubungan dengan hasil evaluasi tersebut, saya memohon izin untuk berkonsultasi mengenai kelanjutan dan strategi rencana studi saya.\n\nTerima kasih,\n" . $mahasiswa->nama;
@@ -212,95 +200,59 @@
                         </div>
                     </div>
 
-                    <!-- Contextual Guidance Card Based on Risk Level -->
-                    @if($statusRisiko === 'Risiko Tinggi')
-                        <div class="p-5 rounded-xl bg-rose-50/60 border border-rose-200/90 space-y-3">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                                </div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-rose-900 uppercase tracking-wider">Perhatian Khusus: Segera Lakukan Konsultasi dengan Dosen PA</h5>
-                                    <p class="text-[11px] text-rose-700">Terdapat indikator evaluasi yang memerlukan bimbingan penanganan segera</p>
-                                </div>
+                    <!-- Contextual Guidance Card Based on Configured Risk Level -->
+                    @php
+                        $alertBg = match($configRisiko?->warna ?? 'brand') {
+                            'rose' => 'bg-rose-50/60 border-rose-200/90',
+                            'amber' => 'bg-amber-50/60 border-amber-200/90',
+                            default => 'bg-brand-50/60 border-brand-200/90',
+                        };
+                        $alertIconBg = match($configRisiko?->warna ?? 'brand') {
+                            'rose' => 'bg-rose-500 text-white',
+                            'amber' => 'bg-amber-500 text-white',
+                            default => 'bg-brand-600 text-white',
+                        };
+                        $alertTitleColor = match($configRisiko?->warna ?? 'brand') {
+                            'rose' => 'text-rose-900',
+                            'amber' => 'text-amber-900',
+                            default => 'text-brand-900',
+                        };
+                        $alertSubColor = match($configRisiko?->warna ?? 'brand') {
+                            'rose' => 'text-rose-700',
+                            'amber' => 'text-amber-700',
+                            default => 'text-brand-700',
+                        };
+                    @endphp
+
+                    <div class="p-5 rounded-xl border {{ $alertBg }} space-y-3">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-7 h-7 rounded-lg {{ $alertIconBg }} flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="{{ $configRisiko?->icon ?? 'alert-circle' }}" class="w-4 h-4"></i>
                             </div>
+                            <div>
+                                <h5 class="text-xs font-bold {{ $alertTitleColor }} uppercase tracking-wider">{{ $configRisiko?->label_badge ?? 'Panduan Bimbingan' }}</h5>
+                                <p class="text-[11px] {{ $alertSubColor }}">{{ $configRisiko?->deskripsi_singkat ?? 'Panduan tindak lanjut evaluasi akademik mahasiswa' }}</p>
+                            </div>
+                        </div>
 
-                            <p class="text-xs text-rose-900/90 leading-relaxed">
-                                Sistem SIPRA-C4.5 mendeteksi bahwa performa akademik Anda terindikasi <strong>Risiko Tinggi</strong> (terkait IPK di bawah 2.75, kehadiran kurang dari 75%, atau penumpukan SKS tidak lulus). <strong>Anda sangat disarankan untuk segera menghubungi Dosen PA Anda</strong> untuk menyusun rencana pemulihan studi agar terhindar dari sanksi peringatan akademik atau risiko keterlambatan masa studi.
-                            </p>
+                        <p class="text-xs {{ $alertTitleColor }}/90 leading-relaxed">
+                            {{ $configRisiko?->pesan_peringatan ?? 'Segera koordinasikan rencana studi semester depan bersama Dosen PA Anda.' }}
+                        </p>
 
-                            <div class="bg-white p-4 rounded-lg border border-rose-200 text-xs space-y-2">
+                        @if(!empty($configRisiko?->panduan_konsultasi_pa))
+                            <div class="bg-white p-4 rounded-lg border border-slate-200 text-xs space-y-2">
                                 <p class="font-bold text-slate-900 flex items-center gap-1.5">
-                                    <i data-lucide="check-square" class="w-3.5 h-3.5 text-rose-600"></i>
+                                    <i data-lucide="check-square" class="w-3.5 h-3.5 text-brand-600"></i>
                                     <span>Panduan & Hal yang Perlu Dikonsultasikan ke Dosen PA:</span>
                                 </p>
                                 <ul class="list-disc pl-5 space-y-1 text-slate-600 text-[11px] leading-relaxed">
-                                    <li><strong>Konsultasi Beban SKS Semester Depan</strong>: Minta arahan Dosen PA untuk mengambil jumlah SKS yang realistis agar fokus perbaikan nilai maksimal.</li>
-                                    <li><strong>Rencana Perbaikan Mata Kuliah (Remidi)</strong>: Bawa transkrip nilai dan identifikasi mata kuliah nilai D/E untuk dijadwalkan ulang.</li>
-                                    <li><strong>Komitmen Presensi & Kehadiran</strong>: Diskusikan kendala perkuliahan yang dihadapi agar memenuhi syarat presensi minimal ujian (75%).</li>
-                                    <li><strong>Jadwal Pemantauan Berkala</strong>: Sepakati jadwal pertemuan konsultasi secara berkala minimal 2 hingga 3 kali selama semester berjalan.</li>
+                                    @foreach($configRisiko->panduan_konsultasi_pa as $poin)
+                                        <li>{{ $poin }}</li>
+                                    @endforeach
                                 </ul>
                             </div>
-                        </div>
-
-                    @elseif($statusRisiko === 'Risiko Sedang')
-                        <div class="p-5 rounded-xl bg-amber-50/60 border border-amber-200/90 space-y-3">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                                </div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-amber-900 uppercase tracking-wider">Saran: Jadwalkan Sesi Konsultasi Evaluasi Studi</h5>
-                                    <p class="text-[11px] text-amber-700">Tingkatkan indikator akademik sebelum memasuki semester berikutnya</p>
-                                </div>
-                            </div>
-
-                            <p class="text-xs text-amber-900/90 leading-relaxed">
-                                Performa akademik Anda berada pada kategori <strong>Risiko Sedang (Waspada)</strong>. Beberapa indikator perlu ditingkatkan agar performa kembali optimal. Segera koordinasikan rencana studi semester depan bersama Dosen PA Anda.
-                            </p>
-
-                            <div class="bg-white p-4 rounded-lg border border-amber-200 text-xs space-y-2">
-                                <p class="font-bold text-slate-900 flex items-center gap-1.5">
-                                    <i data-lucide="check-square" class="w-3.5 h-3.5 text-amber-600"></i>
-                                    <span>Panduan Konsultasi ke Dosen PA:</span>
-                                </p>
-                                <ul class="list-disc pl-5 space-y-1 text-slate-600 text-[11px] leading-relaxed">
-                                    <li><strong>Review Mata Kuliah Prasyarat</strong>: Pastikan mata kuliah inti dan prasyarat konsentrasi telah diselesaikan.</li>
-                                    <li><strong>Optimalisasi Pengisian KRS</strong>: Diskusikan mata kuliah pilihan yang sesuai dengan peminatan dan kemampuan belajar Anda.</li>
-                                    <li><strong>Pencegahan Presensi Kritis</strong>: Pastikan kehadiran perkuliahan selalu di atas 80% untuk mengamankan hak ujian.</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                    @else
-                        <div class="p-5 rounded-xl bg-brand-50/60 border border-brand-200/90 space-y-3">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center flex-shrink-0">
-                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                                </div>
-                                <div>
-                                    <h5 class="text-xs font-bold text-brand-900 uppercase tracking-wider">Performa Sangat Baik: Tetap Lakukan Konsultasi Rutin</h5>
-                                    <p class="text-[11px] text-brand-700">Anda berada pada jalur kelulusan tepat waktu yang aman</p>
-                                </div>
-                            </div>
-
-                            <p class="text-xs text-brand-900/90 leading-relaxed">
-                                Selamat! Performa akademik Anda terdeteksi dalam kategori <strong>Risiko Rendah (Aman)</strong>. Pertahankan prestasi dan kedisiplinan Anda. Tetap lakukan konsultasi rutin dengan Dosen PA Anda pada setiap awal semester untuk validasi KRS serta perencanaan kelulusan tepat waktu.
-                            </p>
-
-                            <div class="bg-white p-4 rounded-lg border border-brand-200 text-xs space-y-2">
-                                <p class="font-bold text-slate-900 flex items-center gap-1.5">
-                                    <i data-lucide="check-square" class="w-3.5 h-3.5 text-brand-600"></i>
-                                    <span>Fokus Konsultasi Pengembangan Studi:</span>
-                                </p>
-                                <ul class="list-disc pl-5 space-y-1 text-slate-600 text-[11px] leading-relaxed">
-                                    <li><strong>Penyusunan Rencana Tugas Akhir / Skripsi</strong>: Diskusikan peminatan riset dan topik penelitian skripsi sedini mungkin.</li>
-                                    <li><strong>Program MBKM & Magang Industri</strong>: Konsultasikan konversi SKS untuk program magang bersertifikat atau studi independen.</li>
-                                    <li><strong>Sertifikasi Kompetensi</strong>: Minta arahan mengenai sertifikasi profesi bidang Sistem Informasi yang relevan dengan dunia kerja.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
 
                 @else
                     <!-- No Advisor Assigned Notice -->

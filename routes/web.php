@@ -38,6 +38,10 @@ Route::middleware(['auth'])->group(function () {
         // Master Data Dosen Pembimbing Akademik (Dosen PA)
         Route::resource('dosen', \App\Http\Controllers\DosenPaController::class);
 
+        // Master Data Pengaturan Kategori & Teks Peringatan Risiko
+        Route::post('risiko/{risiko}/reset', [\App\Http\Controllers\KategoriRisikoController::class, 'reset'])->name('risiko.reset');
+        Route::resource('risiko', \App\Http\Controllers\KategoriRisikoController::class)->except(['create', 'store', 'destroy']);
+
         // Master Data Akademik & Excel Import/Export
         Route::get('akademik/template', [\App\Http\Controllers\DataAkademikController::class, 'downloadTemplate'])->name('akademik.template');
         Route::post('akademik/import', [\App\Http\Controllers\DataAkademikController::class, 'import'])->name('akademik.import');

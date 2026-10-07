@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             RealMahasiswaSeeder::class,
             C45ModelSeeder::class,
+            KategoriRisikoSeeder::class,
         ]);
     }
 }

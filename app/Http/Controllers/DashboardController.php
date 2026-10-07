@@ -115,11 +115,15 @@ class DashboardController extends Controller
         $latestPrediksi = $mahasiswa?->latestPrediksi;
         $riwayatAkademik = $mahasiswa?->dataAkademiks ?? collect();
 
+        $statusRisiko = $latestAkademik->label_risiko_aktual ?? 'Risiko Rendah';
+        $configRisiko = \App\Models\KategoriRisiko::getByStatus($statusRisiko);
+
         return view('dashboard.mahasiswa', compact(
             'mahasiswa',
             'latestAkademik',
             'latestPrediksi',
-            'riwayatAkademik'
+            'riwayatAkademik',
+            'configRisiko'
         ));
     }
 
